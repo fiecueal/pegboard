@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pegboard</title>
+  <script defer src="index.js"></script>
+  <!-- <script defer src="debug.js"></script> -->
+  <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+  <canvas id="canvas"></canvas>
+  <aside>
+    <div id="keyboard">
+      <button id="q" onclick="keydown({key: 'q'})">Q</button>
+      <button id="w" onclick="keydown({key: 'w'})">W</button>
+      <button id="e" onclick="keydown({key: 'e'})">E</button>
+      <button id="r" onclick="keydown({key: 'r'})">R</button>
+      <button id="t" onclick="keydown({key: 't'})">T</button>
+      <button id="a" onclick="keydown({key: 'a'})">A</button>
+      <button id="s" onclick="keydown({key: 's'})">S</button>
+      <button id="d" onclick="keydown({key: 'd'})">D</button>
+      <button id="f" onclick="keydown({key: 'f'})">F</button>
+      <button id="g" onclick="keydown({key: 'g'})">G</button>
+      <button id="z" onclick="keydown({key: 'z'})">Z</button>
+      <button id="x" onclick="keydown({key: 'x'})">X</button>
+      <button id="c" onclick="keydown({key: 'c'})">C</button>
+      <button id="v" onclick="keydown({key: 'v'})">V</button>
+      <button id="b" onclick="keydown({key: 'b'})">B</button>
+      <button id="shift" onclick="keydown({key: 'shift', gui: true})">SHIFT</button>
+    </div>
+    <div id="mouse">
+      <button disabled>place point</button>
+      <button disabled>delete point</button>
+      <button disabled>hold left btn to drag point</button>
+    </div>
+    <a href="https://github.com/fiecueal/pegboard">source code</a>
+  </aside>
+</body>
+
+</html>

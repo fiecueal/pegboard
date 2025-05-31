@@ -1,0 +1,106 @@
+#canvas {
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: -1
+}
+
+aside {
+	position: fixed;
+	top: 1rem;
+	left: 1rem;
+	padding: 0.2rem;
+	border: 2px grey solid;
+	border-radius: 5px;
+	background: #0001
+}
+
+#keyboard,
+#mouse {
+	width: min-content;
+	margin: 0.2rem auto;
+	display: grid;
+	gap: 0.2rem
+}
+
+#keyboard {
+	--size: 2.5rem;
+	padding-right: calc(var(--size) / 4 * 3);
+	grid-template-columns: repeat(5, 1fr);
+
+	* {
+		width: var(--size);
+		height: var(--size)
+	}
+
+	:nth-child(n+6) {
+		margin-right: calc(-1 * var(--size))
+	}
+}
+
+#a,
+#s,
+#d,
+#f,
+#g {
+	margin-left: calc(var(--size) / 4)
+}
+
+#z,
+#x,
+#c,
+#v,
+#b {
+	margin-left: calc(var(--size) / 4 * 3)
+}
+
+#shift {
+	width: var(--size);
+	min-width: min-content;
+	padding: 0 10px
+}
+
+#mouse {
+	--size: 4rem;
+	grid-template-columns: 1fr 1fr;
+
+	* {
+		width: var(--size);
+		height: var(--size);
+		color: black
+	}
+
+	:nth-child(1) {
+		border-top-left-radius: calc(var(--size) / 2)
+	}
+
+	:nth-child(2) {
+		border-top-right-radius: calc(var(--size) / 2)
+	}
+
+	:nth-child(3) {
+		width: calc(var(--size) * 2 + 0.2rem);
+		height: calc(var(--size) * 2 + 0.2rem);
+		border-bottom-left-radius: var(--size);
+		border-bottom-right-radius: var(--size);
+		grid-column: span 2
+	}
+}
+
+button {
+	border-radius: 5px;
+	background: #fff;
+
+	&:hover {
+		filter: brightness(0.9)
+	}
+
+	&:active,
+	&.active {
+		filter: brightness(0.8)
+	}
+
+	&:disabled {
+		filter: brightness(0.7)
+	}
+}
