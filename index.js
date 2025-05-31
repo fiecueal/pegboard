@@ -4,7 +4,7 @@ const
 	canvas = document.getElementById("canvas"),
 	ctx = canvas.getContext("2d", { desynchronized: true }), // test
 	/** misc app properties */
-	state = {
+	state = { //later
 		/** pixel offset of canvas from topleft */
 		dragOffset: [0, 0],
 		zoom: 100,
@@ -246,26 +246,32 @@ function keydown(e) {
 	if (e.repeat) return
 	const k = e.key.toLowerCase()
 
-	if (k === "shift") {
-		if (e.gui) {
-			if (shift.held) return
+	switch (k) {
+		case "shift":
+			if (e.gui) {
+				if (shift.held) return
 
-			if (shift.toggled) {
-				shift.b.classList.remove("active")
-				setKeybindLayer(0)
+				if (shift.toggled) {
+					shift.b.classList.remove("active")
+					setKeybindLayer(0)
+				} else {
+					shift.b.classList.add("active")
+					setKeybindLayer(1)
+				}
+				shift.toggled = !shift.toggled
 			} else {
+				shift.held = true
 				shift.b.classList.add("active")
 				setKeybindLayer(1)
 			}
-			shift.toggled = !shift.toggled
-		} else {
-			shift.held = true
-			shift.b.classList.add("active")
-			setKeybindLayer(1)
-		}
-	} else {
-		const f = keybinds[shift.down ? 1 : 0][k]
-		if (f) keyfns[f]()
+			break
+		case "escape":
+			points.length = 0
+			redraw()
+			break
+		default:
+			const f = keybinds[shift.down ? 1 : 0][k]
+			if (f) keyfns[f]()
 	}
 }
 
