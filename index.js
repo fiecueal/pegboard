@@ -28,7 +28,9 @@ const
 		offsetX: 0,
 		/** `grid.offsetX` Y axis edition */
 		offsetY: 0,
-		gap: 14,
+		_gap: 15,
+		set gap(n) { this._gap = Math.min(Math.max(n, 10), 20) },
+		get gap() { return this._gap },
 		visible: true,
 		/**
 		 * cached as image; everything gets rerendered on mousemove
@@ -297,6 +299,15 @@ function resize() {
 	draw()
 }
 
+function wheel(e) {
+	grid.gap += e.deltaY < 0 ? 1 : -1
+
+	//TODO this is inefficient
+	render.img = null
+	buildSVG()
+	resize()
+}
+
 function mousemove(e) {
 	const x = Math.trunc((e.clientX + grid.gap / 2 - grid.offsetX) / grid.gap)
 	const y = Math.trunc((e.clientY + grid.gap / 2 - grid.offsetY) / grid.gap)
@@ -309,7 +320,6 @@ function mousemove(e) {
 }
 
 function mousedown(e) {
-	console.log(e.button)
 	if (clickdown) return
 	clickdown = { x: cursor.x, y: cursor.y, b: e.button }
 
@@ -367,6 +377,7 @@ window.addEventListener("keydown", keydown)
 window.addEventListener("keyup", keyup)
 window.addEventListener("resize", resize)
 
+canvas.addEventListener("wheel", wheel)
 canvas.addEventListener("mousemove", mousemove)
 canvas.addEventListener("mousedown", mousedown)
 canvas.addEventListener("mouseup", mouseup)
