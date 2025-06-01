@@ -28,11 +28,6 @@ aside {
 	padding-right: calc(var(--size) / 4 * 3);
 	grid-template-columns: repeat(5, 1fr);
 
-	* {
-		width: var(--size);
-		height: var(--size)
-	}
-
 	:nth-child(n+6) {
 		margin-right: calc(-1 * var(--size))
 	}
@@ -55,7 +50,6 @@ aside {
 }
 
 #shift {
-	width: var(--size);
 	min-width: min-content;
 	padding: 0 10px
 }
@@ -65,8 +59,6 @@ aside {
 	grid-template-columns: 1fr 1fr;
 
 	* {
-		width: var(--size);
-		height: var(--size);
 		color: black
 	}
 
@@ -80,7 +72,7 @@ aside {
 
 	:nth-child(3) {
 		width: calc(var(--size) * 2 + 0.2rem);
-		height: calc(var(--size) * 2 + 0.2rem);
+		height: calc(var(--size) * 2);
 		border-bottom-left-radius: var(--size);
 		border-bottom-right-radius: var(--size);
 		grid-column: span 2
@@ -90,6 +82,8 @@ aside {
 button {
 	border-radius: 5px;
 	background: #fff;
+	width: var(--size);
+	height: var(--size);
 
 	&:hover {
 		filter: brightness(0.9)
