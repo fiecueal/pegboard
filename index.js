@@ -119,9 +119,24 @@ const
 	}
 
 let
+	guiHidden = false,
 	clickdown,
 	clickup, //TODO might remove
 	currentPath = paths[0]
+
+function toggleGUI() {
+	if (guiHidden) {
+		for (const c of document.querySelector("aside").children) {
+			c.classList.remove("hide")
+		}
+	} else {
+		for (const c of document.querySelector("aside").children) {
+			c.classList.add("hide")
+		}
+	}
+
+	guiHidden = !guiHidden
+}
 
 function drawGrid() {
 	if (!grid.visible) return
