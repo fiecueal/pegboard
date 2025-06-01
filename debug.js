@@ -32,9 +32,9 @@ window.addEventListener("keydown", (e) => {
   switch (e.key.toLowerCase()) {
     case "a":
       debugpreviewpoints.textContent = JSON.stringify(points).replaceAll("],", "\n")
-      debugcurrentpath.innerHTML = JSON.stringify(currentPath)
-        .replaceAll(/,(?=[^,]*:)/g, "\n")
-        .replaceAll("],", "\n")
+      // debugcurrentpath.innerHTML = JSON.stringify(currentPath)
+      //   .replaceAll(/,(?=[^,]*:)/g, "\n")
+      //   .replaceAll("],", "\n")
       break
     case "escape":
       debugpreviewpoints.textContent = null

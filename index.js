@@ -48,8 +48,19 @@ const
 		imgSize: null
 	},
 	cursor = { x: 0, y: 0 },
-	/** svg path data */
-	paths = [{ d: [] }],
+	/** svg path elements and data associated with them */
+	paths = [
+		{
+			el: document.createElementNS("http://www.w3.org/2000/svg", "path"),
+			/**
+			 * linked list array
+			 * should only have heads of segments + properties
+			 * if this doesn't work out switch to a 2d array
+			 * @type {{type: string, x: number, y: number, next: ?{}, prev: ?{}}[]}
+			 */
+			d: []
+		}
+	], // atm used in keyfns.line, drawrender, drawplacedpoints, buildsvg, mouse(up|down)
 	/** points before they get added to the path */
 	points = [],
 	/** [0] = base layer; [1] = shift layer */
@@ -83,10 +94,20 @@ const
 		line: _ => {
 			if (points.length < 2) return
 
-			currentPath.d.push([points[0][0], points[0][1], "M"])
+			let tail = { x: points[0][0], y: points[0][1], type: "M" }
+			currentPath.d.push(tail)
+			let prev = tail
 			for (let i = 1; i < points.length; i++) {
-				currentPath.d.push([points[i][0], points[i][1], "L"])
+				tail.next = { x: points[i][0], y: points[i][1], type: "L" }
+				tail = tail.next
+				tail.prev = prev
+				prev = tail
 			}
+
+			// currentPath.d.push([points[0][0], points[0][1], "M"])
+			// for (let i = 1; i < points.length; i++) {
+			// 	currentPath.d.push([points[i][0], points[i][1], "L"])
+			// }
 			points.length = 0
 			render.img = null //TODO don't rebuild; add to svg path.d instead
 			buildSVG()
@@ -156,19 +177,32 @@ function drawPreviewPoints() {
 }
 
 function drawPlacedPoints() {
-	for (const point of currentPath.d) {
-		const x = point[0] * grid.gap + grid.offsetX
-		const y = point[1] * grid.gap + grid.offsetY
-		ctx.beginPath()
-		ctx.moveTo(x, y)
-		ctx.arc(x, y, grid.gap / 3, 0, 2 * Math.PI)
-		ctx.fillStyle = "black"
-		ctx.fill()
-		ctx.closePath()
-		ctx.beginPath()
-		ctx.arc(x, y, grid.gap / 6, 0, 2 * Math.PI)
-		ctx.fillStyle = "white"
-		ctx.fill()
+	for (let point of currentPath.d) {
+		while (point) {
+			const x = point.x * grid.gap + grid.offsetX
+			const y = point.y * grid.gap + grid.offsetY
+			ctx.beginPath()
+			ctx.arc(x, y, grid.gap / 3, 0, 2 * Math.PI)
+			ctx.fillStyle = "black"
+			ctx.fill()
+			ctx.beginPath()
+			ctx.arc(x, y, grid.gap / 6, 0, 2 * Math.PI)
+			ctx.fillStyle = "white"
+			ctx.fill()
+			point = point.next
+		}
+		// const x = point[0] * grid.gap + grid.offsetX
+		// const y = point[1] * grid.gap + grid.offsetY
+		// ctx.beginPath()
+		// ctx.moveTo(x, y)
+		// ctx.arc(x, y, grid.gap / 3, 0, 2 * Math.PI)
+		// ctx.fillStyle = "black"
+		// ctx.fill()
+		// ctx.closePath()
+		// ctx.beginPath()
+		// ctx.arc(x, y, grid.gap / 6, 0, 2 * Math.PI)
+		// ctx.fillStyle = "white"
+		// ctx.fill()
 	}
 }
 
@@ -196,20 +230,34 @@ function redraw() {
 }
 
 //TODO don't build after every action; just add new points as needed
+// only handles one path atm
 function buildSVG() {
 	render.svg.setAttribute("viewBox", `0 0 ${grid.x} ${grid.y}`) //MAYBE cache viewbox in var for other uses
 	render.svg.innerHTML = ""
 
-	const path = document.createElementNS("http://www.w3.org/2000/svg", "path")
+	currentPath.el ||= document.createElementNS("http://www.w3.org/2000/svg", "path")
+	//TODO insert at correct index
+	if (!render.svg.contains(currentPath.el)) render.svg.appendChild(currentPath.el)
+
 	let d = ""
-	for (const point of currentPath.d) {
-		d += `${point[2]}${point[0]} ${point[1]}`
+	for (let point of currentPath.d) {
+		while (point) {
+			d += `${point.type}${point.x} ${point.y}`
+			point = point.next
+		}
 	}
-	path.setAttribute("d", d)
-	// if (currentPath.stroke) p.setAttribute("stroke", currentPath.stroke)
-	// if (currentPath.strokeWidth) p.setAttribute("stroke-width", currentPath.strokeWidth)
-	// if (currentPath.fill) p.setAttribute("fill", "none", currentPath.fill)
-	render.svg.appendChild(path)
+	currentPath.el.setAttribute("d", d)
+
+	// const path = document.createElementNS("http://www.w3.org/2000/svg", "path")
+	// let d = ""
+	// for (const point of currentPath.d) {
+	// 	d += `${point[2]}${point[0]} ${point[1]}`
+	// }
+	// path.setAttribute("d", d)
+	// // if (currentPath.stroke) p.setAttribute("stroke", currentPath.stroke)
+	// // if (currentPath.strokeWidth) p.setAttribute("stroke-width", currentPath.strokeWidth)
+	// // if (currentPath.fill) p.setAttribute("fill", "none", currentPath.fill)
+	// render.svg.appendChild(path)
 }
 
 /** assumes render.(svg|img) is built before reaching this method */
@@ -324,12 +372,21 @@ function mousedown(e) {
 	clickdown = { x: cursor.x, y: cursor.y, b: e.button }
 
 	//TODO change point coord storage (2d array or sumn)
-	for (const point of currentPath.d) {
-		if (point[0] === cursor.x && point[1] === cursor.y) {
-			clickdown.points ||= []
-			clickdown.points.push(point)
+	for (let point of currentPath.d) {
+		while (point) {
+			if (point.x === cursor.x && point.y === cursor.y) {
+				clickdown.points ||= []
+				clickdown.points.push(point)
+			}
+			point = point.next
 		}
 	}
+	// for (const point of currentPath.d) {
+	// 	if (point[0] === cursor.x && point[1] === cursor.y) {
+	// 		clickdown.points ||= []
+	// 		clickdown.points.push(point)
+	// 	}
+	// }
 }
 
 function mouseup(e) {
@@ -353,16 +410,36 @@ function mouseup(e) {
 			}
 
 			for (const point of clickdown.points) {
-				point[0] = clickup.x
-				point[1] = clickup.y
+				point.x = clickup.x
+				point.y = clickup.y
+				// point[0] = clickup.x
+				// point[1] = clickup.y
 			}
 			render.img = null
 			buildSVG()
 			redraw()
 			break
-		case 2: //TODO broken
+		case 2: //TODO still broken
 			if (clickdown.points) {
-				currentPath.d = currentPath.d.filter(point => !clickdown.points.includes(point))
+				for (let point of currentPath.d) {
+					while (point) {
+						if (clickdown.points.includes(point)) {
+							if (point.type === "M") {
+								if (point.next) {
+									point.next.type = "M"
+									const i = currentPath.d.indexOf(point)
+									currentPath.d.splice(i, 1, point.next)
+								} else {
+									currentPath.d.pop(point)
+								}
+							}
+							if (point.next) point.next.prev = point.prev
+							if (point.prev) point.prev.next = point.next
+						}
+						point = point.next
+					}
+				}
+				// currentPath.d = currentPath.d.filter(point => !clickdown.points.includes(point))
 				render.img = null
 				buildSVG()
 				redraw()
