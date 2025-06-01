@@ -212,7 +212,6 @@ function drawCursor() {
 	ctx.beginPath()
 	ctx.moveTo(x + grid.gap / 2, y)
 	ctx.arc(x, y, grid.gap / 2, 0, 2 * Math.PI)
-	ctx.fillStyle = "#000"
 	ctx.stroke()
 }
 
@@ -402,7 +401,6 @@ function mouseup(e) {
 				ctx.beginPath()
 				const x = cursor.x * grid.gap + grid.offsetX
 				const y = cursor.y * grid.gap + grid.offsetY
-				ctx.moveTo(x, y)
 				ctx.arc(x, y, 3, 0, 2 * Math.PI)
 				ctx.fillStyle = "grey"
 				ctx.fill()
