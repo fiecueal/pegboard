@@ -67,7 +67,7 @@ const
 	keybinds = [
 		{
 			a: "line",
-			// s: "arc",
+			s: "arc",
 			// d: "arc_rev",
 			// f: "bezier_quad",
 			// g: "bezier_cube",
@@ -93,25 +93,11 @@ const
 	keyfns = {
 		line: _ => {
 			if (points.length < 2) return
-
-			let tail = { x: points[0][0], y: points[0][1], type: "M" }
-			currentPath.d.push(tail)
-			let prev = tail
-			for (let i = 1; i < points.length; i++) {
-				tail.next = { x: points[i][0], y: points[i][1], type: "L" }
-				tail = tail.next
-				tail.prev = prev
-				prev = tail
-			}
-
-			// currentPath.d.push([points[0][0], points[0][1], "M"])
-			// for (let i = 1; i < points.length; i++) {
-			// 	currentPath.d.push([points[i][0], points[i][1], "L"])
-			// }
-			points.length = 0
-			render.img = null //TODO don't rebuild; add to svg path.d instead
-			buildSVG()
-			redraw()
+			addSegment("L")
+		},
+		arc: _ => {
+			if (points.length < 2) return
+			addSegment("A")
 		},
 		svg: _ => exportRender("image/svg+xml"),
 		// png: _ => exportRender("image/png"),
@@ -243,6 +229,27 @@ function redraw() {
 	draw()
 }
 
+function addSegment(type) {
+	let tail = { x: points[0][0], y: points[0][1], type: "M" }
+	currentPath.d.push(tail)
+	let prev = tail
+	for (let i = 1; i < points.length; i++) {
+		tail.next = { x: points[i][0], y: points[i][1], type }
+		tail = tail.next
+		tail.prev = prev
+		prev = tail
+	}
+
+	// currentPath.d.push([points[0][0], points[0][1], "M"])
+	// for (let i = 1; i < points.length; i++) {
+	// 	currentPath.d.push([points[i][0], points[i][1], "L"])
+	// }
+	points.length = 0
+	render.img = null //TODO don't rebuild; add to svg path.d instead
+	buildSVG()
+	redraw()
+}
+
 //TODO don't build after every action; just add new points as needed
 // only handles one path atm
 function buildSVG() {
@@ -256,7 +263,19 @@ function buildSVG() {
 	let d = ""
 	for (let point of currentPath.d) {
 		while (point) {
-			d += `${point.type}${point.x} ${point.y}`
+			switch (point.type) {
+				case "M":
+				case "L":
+					d += `${point.type}${point.x} ${point.y}`
+					break
+				case "A":
+					const x = Math.abs(point.prev.x - point.x)
+					const y = Math.abs(point.prev.y - point.y)
+					d += `A${x} ${y} 0 0 0 ${point.x} ${point.y}`
+					break
+				default:
+					console.log("bad point.type")
+			}
 			point = point.next
 		}
 	}
