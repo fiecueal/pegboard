@@ -68,8 +68,8 @@ const
 		{
 			a: "line",
 			s: "arc",
-			// d: "arc_rev",
-			// f: "bezier_quad",
+			// d: "arc_rev", //MAYBE remove
+			f: "bezier_quad",
 			// g: "bezier_cube",
 			// z: "linecap",
 			// x: "linejoin",
@@ -98,6 +98,10 @@ const
 		arc: _ => {
 			if (points.length < 2) return
 			addSegment("A")
+		},
+		bezier_quad: _ => {
+			if (points.length < 3 || points.length % 2 === 0) return
+			addSegment("Q")
 		},
 		svg: _ => exportRender("image/svg+xml"),
 		// png: _ => exportRender("image/png"),
@@ -272,6 +276,10 @@ function buildSVG() {
 					const x = Math.abs(point.prev.x - point.x)
 					const y = Math.abs(point.prev.y - point.y)
 					d += `A${x} ${y} 0 0 0 ${point.x} ${point.y}`
+					break
+				case "Q":
+					d += `Q${point.x} ${point.y} ${point.next.x} ${point.next.y}`
+					point = point.next
 					break
 				default:
 					console.log("bad point.type")
@@ -461,8 +469,17 @@ function mouseup(e) {
 									point.next.type = "M"
 									const i = currentPath.d.indexOf(point)
 									currentPath.d.splice(i, 1, point.next)
+									if (point.next.next.type === "Q") {
+										point.next.next.type = "A"
+									}
 								} else {
 									currentPath.d.pop(point)
+								}
+							} else if (point.type === "Q") {
+								if (point.prev.type === "Q") {
+									point.prev = point.prev.prev
+								} else {
+									point.next = point.next.next
 								}
 							}
 							if (point.next) point.next.prev = point.prev
