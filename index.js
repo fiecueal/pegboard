@@ -67,9 +67,8 @@ const
 		{
 			a: "line",
 			s: "arc",
-			// d: "arc_rev", //MAYBE remove
-			f: "bezier_quad",
-			// g: "bezier_cube",
+			d: "bezier_quad",
+			f: "bezier_cube",
 			z: "linecap",
 			x: "linejoin",
 			// c: "close",
@@ -101,6 +100,10 @@ const
 		bezier_quad: _ => {
 			if (points.length < 3 || points.length % 2 === 0) return
 			addSegment("Q")
+		},
+		bezier_cube: _ => {
+			if (points.length < 4 || (points.length - 1) % 3 !== 0) return
+			addSegment("C")
 		},
 		linecap: _ => {
 			const prev = currentPath.el.getAttribute("stroke-linecap")
@@ -276,6 +279,13 @@ function buildSVG() {
 					break
 				case "Q": // consume both Q points
 					d += `Q${point.x} ${point.y}`
+					point = segment[++i]
+					d += ` ${point.x} ${point.y}`
+					break
+				case "C": //TODO better Q and C handling
+					d += `C${point.x} ${point.y}`
+					point = segment[++i]
+					d += ` ${point.x} ${point.y}`
 					point = segment[++i]
 					d += ` ${point.x} ${point.y}`
 					break
