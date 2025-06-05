@@ -70,8 +70,8 @@ const
 			// d: "arc_rev", //MAYBE remove
 			f: "bezier_quad",
 			// g: "bezier_cube",
-			// z: "linecap",
-			// x: "linejoin",
+			z: "linecap",
+			x: "linejoin",
 			// c: "close",
 			// v: "fill",
 			// rect: "z",
@@ -101,6 +101,24 @@ const
 		bezier_quad: _ => {
 			if (points.length < 3 || points.length % 2 === 0) return
 			addSegment("Q")
+		},
+		linecap: _ => {
+			const prev = currentPath.el.getAttribute("stroke-linecap")
+			if (!prev) currentPath.el.setAttribute("stroke-linecap", "round")
+			else if (prev === "round") currentPath.el.setAttribute("stroke-linecap", "square")
+			else if (prev === "square") currentPath.el.removeAttribute("stroke-linecap")
+			render.img = null
+			redraw()
+		},
+		linejoin: _ => {
+			const prev = currentPath.el.getAttribute("stroke-linejoin")
+			if (!prev) currentPath.el.setAttribute("stroke-linejoin", "miter-clip")
+			else if (prev === "miter-clip") currentPath.el.setAttribute("stroke-linejoin", "round")
+			else if (prev === "round") currentPath.el.setAttribute("stroke-linejoin", "arcs")
+			else if (prev === "arcs") currentPath.el.setAttribute("stroke-linejoin", "bevel")
+			else if (prev === "bevel") currentPath.el.removeAttribute("stroke-linejoin")
+			render.img = null
+			redraw()
 		},
 		svg: _ => exportRender("image/svg+xml"),
 		// png: _ => exportRender("image/png"),
