@@ -393,12 +393,11 @@ function mousedown(e) {
 function mouseup(e) {
 	if (!clickdown) return
 	if (clickdown.b != e.button) return
-	clickup = { x: cursor.x, y: cursor.y, b: e.button }
+	clickup = { x: cursor.x, y: cursor.y, b: e.button } //MAYBE delete clickup (redundant)
 
 	switch (e.button) {
 		case 0:
-			if (clickup.x === clickdown.x && clickup.y === clickdown.y ||
-				!clickdown.points) {
+			if (clickup.x === clickdown.x && clickup.y === clickdown.y || !clickdown.points) {
 				points.push([cursor.x, cursor.y])
 				ctx.beginPath()
 				const x = cursor.x * grid.gap + grid.offsetX
@@ -417,22 +416,18 @@ function mouseup(e) {
 			buildSVG()
 			redraw()
 			break
-		case 2: //TODO still broken
+		case 2: //TODO not broken but it looks atrocious
 			if (!clickdown.points) return
 
 			let p
 			while (p = clickdown.points.pop()) {
 				for (const segment of currentPath.d) {
 					if (!segment.includes(p)) continue
-					if (segment.length === 1) { // remove lone "M" point
-						segment.pop()
-						continue
-					}
+
 					const i = segment.indexOf(p)
-					if (p.type === "M") { // p = segment[0]
+					if (p.type === "M" && segment[1]) { // p = segment[0]
+						if (segment[1].type === "Q") segment[2].type = "A" // segment[1] Q implies segment[2] Q
 						segment[1].type = "M"
-						// don't leave "Q" command without a pair
-						if (segment[2] && segment[2].type === "Q") segment[2].type = "A"
 					} else if (p.type === "Q") { // remove both end point & control point for "Q" commands
 						if (segment[i - 1].type === "Q") segment.splice(i - 1, 1)
 						else segment.splice(i + 1, 1)
