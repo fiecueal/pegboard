@@ -99,11 +99,11 @@ const
 		},
 		bezier_quad: _ => {
 			if (points.length < 3 || points.length % 2 === 0) return
-			addSegment("Q")
+			addSegment("Q", 2)
 		},
 		bezier_cube: _ => {
 			if (points.length < 4 || (points.length - 1) % 3 !== 0) return
-			addSegment("C")
+			addSegment("C", 3)
 		},
 		linecap: _ => {
 			const prev = currentPath.el.getAttribute("stroke-linecap")
@@ -240,10 +240,11 @@ function redraw() {
 	draw()
 }
 
-function addSegment(type) {
+/** count = control points + end point */
+function addSegment(type, count = 1) {
 	const segment = [{ x: points[0][0], y: points[0][1], type: "M" }]
 	for (let i = 1; i < points.length; i++) {
-		segment.push({ x: points[i][0], y: points[i][1], type })
+		segment.push({ x: points[i][0], y: points[i][1], type: `${type}${i % count}` })
 	}
 	currentPath.d.push(segment)
 
@@ -269,24 +270,19 @@ function buildSVG() {
 			let point = segment[i]
 			switch (point.type) {
 				case "M":
-				case "L":
-					d += `${point.type}${point.x} ${point.y}`
+				case "L0":
+				case "Q1":
+				case "C1":
+					d += `${point.type[0]}${point.x} ${point.y}`
 					break
-				case "A":
+				case "A0":
 					const x = Math.abs(segment[i - 1].x - point.x)
 					const y = Math.abs(segment[i - 1].y - point.y)
 					d += `A${x} ${y} 0 0 0 ${point.x} ${point.y}` //TODO moddable nums
 					break
-				case "Q": // consume both Q points
-					d += `Q${point.x} ${point.y}`
-					point = segment[++i]
-					d += ` ${point.x} ${point.y}`
-					break
-				case "C": //TODO better Q and C handling
-					d += `C${point.x} ${point.y}`
-					point = segment[++i]
-					d += ` ${point.x} ${point.y}`
-					point = segment[++i]
+				case "Q0":
+				case "C2":
+				case "C0":
 					d += ` ${point.x} ${point.y}`
 					break
 				default:
@@ -454,11 +450,25 @@ function mouseup(e) {
 
 					const i = segment.indexOf(p)
 					if (p.type === "M" && segment[1]) { // p = segment[0]
-						if (segment[1].type === "Q") segment[2].type = "A" // segment[1] Q implies segment[2] Q
+						if (segment[1].type === "Q1") segment[2].type = "A0"
+						if (segment[1].type === "C1") {
+							segment[2].type = "Q1"
+							segment[3].type = "Q0"
+						}
 						segment[1].type = "M"
-					} else if (p.type === "Q") { // remove both end point & control point for "Q" commands
-						if (segment[i - 1].type === "Q") segment.splice(i - 1, 1)
-						else segment.splice(i + 1, 1)
+					} else if (p.type === "Q1") {
+						segment[i + 1].type = "A0"
+					} else if (p.type === "Q0") {
+						segment[i - 1].type = "A0"
+					} else if (p.type === "C1") {
+						segment[i + 1].type = "Q1"
+						segment[i + 2].type = "Q0"
+					} else if (p.type === "C2") {
+						segment[i - 1].type = "Q1"
+						segment[i + 1].type = "Q0"
+					} else if (p.type === "C0") {
+						segment[i - 2].type = "Q1"
+						segment[i - 1].type = "Q0"
 					}
 					segment.splice(i, 1)
 					break
