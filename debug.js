@@ -18,23 +18,23 @@ canvas.addEventListener("mousemove", e => {
   debugcursorpos.textContent = `${cursor.x},${cursor.y}`
 })
 
-canvas.addEventListener("mousedown", () => {
+canvas.addEventListener("mousedown", _ => {
   debugcursordown.textContent = `${clickdown.x},${clickdown.y} b ${clickdown.b}`
 })
 
-canvas.addEventListener("mouseup", () => {
+canvas.addEventListener("mouseup", _ => {
   debugcursorup.textContent = `${clickup.x},${clickup.y} b ${clickup.b}`
   debugpreviewpoints.textContent = JSON.stringify(points).replaceAll("],", "\n")
 })
 
-window.addEventListener("keydown", (e) => {
+window.addEventListener("keydown", e => {
   debugkeydown.textContent = e.key
   switch (e.key.toLowerCase()) {
     case "a":
+    case "s":
+    case "f":
       debugpreviewpoints.textContent = JSON.stringify(points).replaceAll("],", "\n")
-      // debugcurrentpath.innerHTML = JSON.stringify(currentPath)
-      //   .replaceAll(/,(?=[^,]*:)/g, "\n")
-      //   .replaceAll("],", "\n")
+      debugcurrentpath.innerHTML = JSON.stringify(currentPath.d).replaceAll(/[\]\}],/g, "\n")
       break
     case "escape":
       debugpreviewpoints.textContent = null
