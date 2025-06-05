@@ -53,12 +53,11 @@ const
 		{
 			el: document.createElementNS("http://www.w3.org/2000/svg", "path"),
 			/**
-			 * linked list array
-			 * should only have heads of segments + properties
-			 * if this doesn't work out switch to a 2d array
-			 * @type {{type: string, x: number, y: number, next: ?{}, prev: ?{}}[]}
+			 * every element is a separate "M" segment under the same path
+			 * always `d[n][0] === "M"`
+			 * @type {{x: number, y: number, type: string}[][]}
 			 */
-			d: []
+			d: [] //TODO "Z" command toggle for every "M" segment
 		}
 	], // atm used in keyfns.line, drawrender, drawplacedpoints, buildsvg, mouse(up|down)
 	/** points before they get added to the path */
@@ -182,8 +181,8 @@ function drawPreviewPoints() {
 }
 
 function drawPlacedPoints() {
-	for (let point of currentPath.d) {
-		while (point) {
+	for (const segment of currentPath.d) {
+		for (const point of segment) {
 			const x = point.x * grid.gap + grid.offsetX
 			const y = point.y * grid.gap + grid.offsetY
 			ctx.beginPath()
@@ -194,20 +193,7 @@ function drawPlacedPoints() {
 			ctx.arc(x, y, grid.gap / 6, 0, 2 * Math.PI)
 			ctx.fillStyle = "white"
 			ctx.fill()
-			point = point.next
 		}
-		// const x = point[0] * grid.gap + grid.offsetX
-		// const y = point[1] * grid.gap + grid.offsetY
-		// ctx.beginPath()
-		// ctx.moveTo(x, y)
-		// ctx.arc(x, y, grid.gap / 3, 0, 2 * Math.PI)
-		// ctx.fillStyle = "black"
-		// ctx.fill()
-		// ctx.closePath()
-		// ctx.beginPath()
-		// ctx.arc(x, y, grid.gap / 6, 0, 2 * Math.PI)
-		// ctx.fillStyle = "white"
-		// ctx.fill()
 	}
 }
 
@@ -234,20 +220,12 @@ function redraw() {
 }
 
 function addSegment(type) {
-	let tail = { x: points[0][0], y: points[0][1], type: "M" }
-	currentPath.d.push(tail)
-	let prev = tail
+	const segment = [{ x: points[0][0], y: points[0][1], type: "M" }]
 	for (let i = 1; i < points.length; i++) {
-		tail.next = { x: points[i][0], y: points[i][1], type }
-		tail = tail.next
-		tail.prev = prev
-		prev = tail
+		segment.push({ x: points[i][0], y: points[i][1], type })
 	}
+	currentPath.d.push(segment)
 
-	// currentPath.d.push([points[0][0], points[0][1], "M"])
-	// for (let i = 1; i < points.length; i++) {
-	// 	currentPath.d.push([points[i][0], points[i][1], "L"])
-	// }
 	points.length = 0
 	render.img = null //TODO don't rebuild; add to svg path.d instead
 	buildSVG()
@@ -265,40 +243,30 @@ function buildSVG() {
 	if (!render.svg.contains(currentPath.el)) render.svg.appendChild(currentPath.el)
 
 	let d = ""
-	for (let point of currentPath.d) {
-		while (point) {
+	for (const segment of currentPath.d) {
+		for (let i = 0; i < segment.length; i++) {
+			let point = segment[i]
 			switch (point.type) {
 				case "M":
 				case "L":
 					d += `${point.type}${point.x} ${point.y}`
 					break
 				case "A":
-					const x = Math.abs(point.prev.x - point.x)
-					const y = Math.abs(point.prev.y - point.y)
-					d += `A${x} ${y} 0 0 0 ${point.x} ${point.y}`
+					const x = Math.abs(segment[i - 1].x - point.x)
+					const y = Math.abs(segment[i - 1].y - point.y)
+					d += `A${x} ${y} 0 0 0 ${point.x} ${point.y}` //TODO moddable nums
 					break
-				case "Q":
-					d += `Q${point.x} ${point.y} ${point.next.x} ${point.next.y}`
-					point = point.next
+				case "Q": // consume both Q points
+					d += `Q${point.x} ${point.y}`
+					point = segment[++i]
+					d += ` ${point.x} ${point.y}`
 					break
 				default:
 					console.log("bad point.type")
 			}
-			point = point.next
 		}
 	}
 	currentPath.el.setAttribute("d", d)
-
-	// const path = document.createElementNS("http://www.w3.org/2000/svg", "path")
-	// let d = ""
-	// for (const point of currentPath.d) {
-	// 	d += `${point[2]}${point[0]} ${point[1]}`
-	// }
-	// path.setAttribute("d", d)
-	// // if (currentPath.stroke) p.setAttribute("stroke", currentPath.stroke)
-	// // if (currentPath.strokeWidth) p.setAttribute("stroke-width", currentPath.strokeWidth)
-	// // if (currentPath.fill) p.setAttribute("fill", "none", currentPath.fill)
-	// render.svg.appendChild(path)
 }
 
 /** assumes render.(svg|img) is built before reaching this method */
@@ -412,22 +380,14 @@ function mousedown(e) {
 	if (clickdown) return
 	clickdown = { x: cursor.x, y: cursor.y, b: e.button }
 
-	//TODO change point coord storage (2d array or sumn)
-	for (let point of currentPath.d) {
-		while (point) {
+	for (const segment of currentPath.d) {
+		for (const point of segment) {
 			if (point.x === cursor.x && point.y === cursor.y) {
 				clickdown.points ||= []
 				clickdown.points.push(point)
 			}
-			point = point.next
 		}
 	}
-	// for (const point of currentPath.d) {
-	// 	if (point[0] === cursor.x && point[1] === cursor.y) {
-	// 		clickdown.points ||= []
-	// 		clickdown.points.push(point)
-	// 	}
-	// }
 }
 
 function mouseup(e) {
@@ -452,47 +412,39 @@ function mouseup(e) {
 			for (const point of clickdown.points) {
 				point.x = clickup.x
 				point.y = clickup.y
-				// point[0] = clickup.x
-				// point[1] = clickup.y
 			}
 			render.img = null
 			buildSVG()
 			redraw()
 			break
 		case 2: //TODO still broken
-			if (clickdown.points) {
-				for (let point of currentPath.d) {
-					while (point) {
-						if (clickdown.points.includes(point)) {
-							if (point.type === "M") {
-								if (point.next) {
-									point.next.type = "M"
-									const i = currentPath.d.indexOf(point)
-									currentPath.d.splice(i, 1, point.next)
-									if (point.next.next.type === "Q") {
-										point.next.next.type = "A"
-									}
-								} else {
-									currentPath.d.pop(point)
-								}
-							} else if (point.type === "Q") {
-								if (point.prev.type === "Q") {
-									point.prev = point.prev.prev
-								} else {
-									point.next = point.next.next
-								}
-							}
-							if (point.next) point.next.prev = point.prev
-							if (point.prev) point.prev.next = point.next
-						}
-						point = point.next
+			if (!clickdown.points) return
+
+			let p
+			while (p = clickdown.points.pop()) {
+				for (const segment of currentPath.d) {
+					if (!segment.includes(p)) continue
+					if (segment.length === 1) { // remove lone "M" point
+						segment.pop()
+						continue
 					}
+					const i = segment.indexOf(p)
+					if (p.type === "M") { // p = segment[0]
+						segment[1].type = "M"
+						// don't leave "Q" command without a pair
+						if (segment[2] && segment[2].type === "Q") segment[2].type = "A"
+					} else if (p.type === "Q") { // remove both end point & control point for "Q" commands
+						if (segment[i - 1].type === "Q") segment.splice(i - 1, 1)
+						else segment.splice(i + 1, 1)
+					}
+					segment.splice(i, 1)
+					break
 				}
-				// currentPath.d = currentPath.d.filter(point => !clickdown.points.includes(point))
-				render.img = null
-				buildSVG()
-				redraw()
 			}
+
+			render.img = null
+			buildSVG()
+			redraw()
 			break
 	}
 
