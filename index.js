@@ -222,8 +222,12 @@ function drawCursor() {
 	const x = cursor.x * grid.gap + grid.offsetX
 	const y = cursor.y * grid.gap + grid.offsetY
 	ctx.beginPath()
-	ctx.moveTo(x + grid.gap / 2, y)
 	ctx.arc(x, y, grid.gap / 2, 0, 2 * Math.PI)
+	ctx.stroke()
+	ctx.beginPath()
+	ctx.arc(x, y, grid.gap / 3, 0, 2 * Math.PI)
+	ctx.strokeStyle = "#fff"
+	ctx.lineWidth = 2
 	ctx.stroke()
 }
 
