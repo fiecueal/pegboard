@@ -441,7 +441,7 @@ function mouseup(e) {
 			redraw()
 			break
 		case 2: //TODO not broken but it looks atrocious
-			if (!clickdown.points) return
+			if (!clickdown.points) break
 
 			let p
 			while (p = clickdown.points.pop()) {
