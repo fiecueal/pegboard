@@ -65,10 +65,12 @@ const
 	/** [0] = base layer; [1] = shift layer */
 	keybinds = [
 		{
+			t: "width_up",
 			a: "line",
 			s: "arc",
 			d: "bezier_quad",
 			f: "bezier_cube",
+			g: "width_down",
 			z: "linecap",
 			x: "linejoin",
 			// c: "close",
@@ -123,6 +125,8 @@ const
 			render.img = null
 			redraw()
 		},
+		width_up: _ => stroke_width(1),
+		width_down: _ => stroke_width(-1),
 		svg: _ => exportRender("image/svg+xml"),
 		// png: _ => exportRender("image/png"),
 		// webp: _ => exportRender("image/webp")
@@ -295,6 +299,17 @@ function buildSVG() {
 		}
 	}
 	currentPath.el.setAttribute("d", d)
+}
+
+function stroke_width(n) {
+	const prev = currentPath.el.getAttribute("stroke-width")
+	const curr = parseInt(prev) + n
+	if (curr > 1) currentPath.el.setAttribute("stroke-width", curr)
+	else currentPath.el.removeAttribute("stroke-width")
+	if (currentPath.el.getAttribute("stroke-width") !== prev) {
+		render.img = null
+		redraw()
+	}
 }
 
 /** assumes render.(svg|img) is built before reaching this method */
