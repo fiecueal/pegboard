@@ -378,13 +378,10 @@ function keydown(e) {
 }
 
 function keyup(e) {
-	switch (e.key.toLowerCase()) {
-		case "shift":
-			shift.held = shift.toggled = false
-			shift.b.classList.remove("active")
-			setKeybindLayer(0)
-			break
-	}
+	if (e.key !== "Shift") return
+	shift.held = shift.toggled = false
+	shift.b.classList.remove("active")
+	setKeybindLayer(0)
 }
 
 function resize() {
@@ -412,7 +409,7 @@ function mousemove(e) {
 	const x = Math.trunc((e.clientX + grid.gap / 2 - grid.offsetX) / grid.gap)
 	const y = Math.trunc((e.clientY + grid.gap / 2 - grid.offsetY) / grid.gap)
 
-	if (cursor.x != x || cursor.y != y) {
+	if (cursor.x !== x || cursor.y !== y) {
 		cursor.x = x
 		cursor.y = y
 		redraw()
@@ -435,7 +432,7 @@ function mousedown(e) {
 
 function mouseup(e) {
 	if (!clickdown) return
-	if (clickdown.b != e.button) return
+	if (clickdown.b !== e.button) return
 	clickup = { x: cursor.x, y: cursor.y, b: e.button } //MAYBE delete clickup (redundant)
 
 	switch (e.button) {
