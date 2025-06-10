@@ -80,7 +80,9 @@ const
 		},
 		{
 			// a: "json",
+			t: "layer_up",
 			s: "svg",
+			g: "layer_down"
 			// d: "png",
 			// f: "webp",
 			// z: "undo",
@@ -130,12 +132,17 @@ const
 		svg: _ => exportRender("image/svg+xml"),
 		// png: _ => exportRender("image/png"),
 		// webp: _ => exportRender("image/webp")
+		//TODO add/rm new paths in proper order
+		//TODO handle skipping empty layers
+		layer_up: _ => setPathLayer(1),
+		layer_down: _ => setPathLayer(-1),
 	}
 
 let
 	guiHidden = false,
 	clickdown,
 	clickup, //TODO might remove
+	currentLayer = 0,
 	currentPath = paths[0]
 
 function toggleGUI() {
@@ -262,43 +269,44 @@ function addSegment(type, count = 1) {
 	redraw()
 }
 
-//TODO don't build after every action; just add new points as needed
+//TODO don't build after every action; just add new points as needed; goal: only call before exporting
+//TODO proper layer addition and removal
 // only handles one path atm
 function buildSVG() {
 	render.svg.setAttribute("viewBox", `0 0 ${grid.x} ${grid.y}`) //MAYBE cache viewbox in var for other uses
+	//TODO insert paths at correct index instead of clearing each build
 	render.svg.innerHTML = ""
 
-	currentPath.el ||= document.createElementNS("http://www.w3.org/2000/svg", "path")
-	//TODO insert at correct index
-	if (!render.svg.contains(currentPath.el)) render.svg.appendChild(currentPath.el)
-
-	let d = ""
-	for (const segment of currentPath.d) {
-		for (let i = 0; i < segment.length; i++) {
-			let point = segment[i]
-			switch (point.type) {
-				case "M":
-				case "L0":
-				case "Q1":
-				case "C1":
-					d += `${point.type[0]}${point.x} ${point.y}`
-					break
-				case "A0":
-					const x = Math.abs(segment[i - 1].x - point.x)
-					const y = Math.abs(segment[i - 1].y - point.y)
-					d += `A${x} ${y} 0 0 0 ${point.x} ${point.y}` //TODO moddable nums
-					break
-				case "Q0":
-				case "C2":
-				case "C0":
-					d += ` ${point.x} ${point.y}`
-					break
-				default:
-					console.log("bad point.type")
+	for (const path of paths) {
+		render.svg.appendChild(path.el)
+		let d = ""
+		for (const segment of path.d) {
+			for (let i = 0; i < segment.length; i++) {
+				let point = segment[i]
+				switch (point.type) {
+					case "M":
+					case "L0":
+					case "Q1":
+					case "C1":
+						d += `${point.type[0]}${point.x} ${point.y}`
+						break
+					case "A0":
+						const x = Math.abs(segment[i - 1].x - point.x)
+						const y = Math.abs(segment[i - 1].y - point.y)
+						d += `A${x} ${y} 0 0 0 ${point.x} ${point.y}` //TODO moddable nums
+						break
+					case "Q0":
+					case "C2":
+					case "C0":
+						d += ` ${point.x} ${point.y}`
+						break
+					default:
+						console.log("bad point.type")
+				}
 			}
 		}
+		path.el.setAttribute("d", d)
 	}
-	currentPath.el.setAttribute("d", d)
 }
 
 function stroke_width(n) {
@@ -329,6 +337,15 @@ function exportRender(type = "image/svg+xml") {
 	// c.height = render.img.naturalHeight
 	// cc.drawImage(render.img, 0, 0)
 	// c.toBlob()
+}
+
+function setPathLayer(d) {
+	currentLayer = Math.max(currentLayer + d, 0)
+	currentLayer += 1
+	paths[currentLayer] ||= { el: document.createElementNS("http://www.w3.org/2000/svg", "path"), d: [] }
+	currentPath = paths[currentLayer]
+	render.svg.appendChild(currentPath.el)
+	redraw()
 }
 
 function setKeybindLayer(l) {
