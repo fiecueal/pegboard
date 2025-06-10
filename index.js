@@ -329,7 +329,6 @@ function saveAs(type) {
 
 function setPathLayer(d) {
 	currentLayer = Math.max(currentLayer + d, 0)
-	currentLayer += 1
 	paths[currentLayer] ||= { el: document.createElementNS("http://www.w3.org/2000/svg", "path"), d: [] }
 	currentPath = paths[currentLayer]
 	render.svg.appendChild(currentPath.el)
