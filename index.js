@@ -105,7 +105,7 @@ const
 			else if (prev === "round") currentPath.el.setAttribute("stroke-linecap", "square")
 			else if (prev === "square") currentPath.el.removeAttribute("stroke-linecap")
 			render.img = null
-			redraw()
+			draw()
 		},
 		linejoin: _ => {
 			const prev = currentPath.el.getAttribute("stroke-linejoin")
@@ -115,7 +115,7 @@ const
 			else if (prev === "arcs") currentPath.el.setAttribute("stroke-linejoin", "bevel")
 			else if (prev === "bevel") currentPath.el.removeAttribute("stroke-linejoin")
 			render.img = null
-			redraw()
+			draw()
 		},
 		width_up: _ => stroke_width(1),
 		width_down: _ => stroke_width(-1),
@@ -187,7 +187,7 @@ function drawRender() {
 	render.img = new Image()
 	render.img.onload = _ => {
 		URL.revokeObjectURL(src)//revoke later to prevent img stutter
-		redraw()
+		draw()
 	}
 	render.img.src = src
 }
@@ -235,16 +235,12 @@ function drawCursor() {
 }
 
 function draw() {
+	canvas.width = canvas.width
 	drawGrid()
 	drawRender()
 	drawPreviewPoints()
 	drawPlacedPoints()
 	drawCursor()
-}
-
-function redraw() {
-	canvas.width = canvas.width
-	draw()
 }
 
 /** count = control points + end point */
@@ -258,7 +254,7 @@ function addSegment(type, count = 1) {
 	points.length = 0
 	render.img = null //TODO don't rebuild; add to svg path.d instead
 	buildSVG()
-	redraw()
+	draw()
 }
 
 //TODO don't build after every action; just add new points as needed; goal: only call before exporting
@@ -308,7 +304,7 @@ function stroke_width(n) {
 	else currentPath.el.removeAttribute("stroke-width")
 	if (currentPath.el.getAttribute("stroke-width") !== prev) {
 		render.img = null
-		redraw()
+		draw()
 	}
 }
 
@@ -337,7 +333,7 @@ function setPathLayer(d) {
 	paths[currentLayer] ||= { el: document.createElementNS("http://www.w3.org/2000/svg", "path"), d: [] }
 	currentPath = paths[currentLayer]
 	render.svg.appendChild(currentPath.el)
-	redraw()
+	draw()
 }
 
 function setKeybindLayer(l) {
@@ -378,7 +374,7 @@ function keydown(e) {
 			break
 		case "escape":
 			points.length = 0
-			redraw()
+			draw()
 			break
 		default:
 			const f = keybinds[shift.down ? 1 : 0][k]
@@ -421,7 +417,7 @@ function mousemove(e) {
 	if (cursor.x !== x || cursor.y !== y) {
 		cursor.x = x
 		cursor.y = y
-		redraw()
+		draw()
 	}
 }
 
@@ -463,7 +459,7 @@ function mouseup(e) {
 			}
 			render.img = null
 			buildSVG()
-			redraw()
+			draw()
 			break
 		case 2: //TODO not broken but it looks atrocious
 			if (!clickdown.points) break
@@ -502,7 +498,7 @@ function mouseup(e) {
 
 			render.img = null
 			buildSVG()
-			redraw()
+			draw()
 			break
 	}
 
