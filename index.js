@@ -59,7 +59,7 @@ const
 			 */
 			d: [] //TODO "Z" command toggle for every "M" segment
 		}
-	], // atm used in keyfns.line, drawrender, drawplacedpoints, buildsvg, mouse(up|down)
+	],
 	/** points before they get added to the path */
 	points = [],
 	/** [0] = base layer; [1] = shift layer */
@@ -92,23 +92,13 @@ const
 		}
 	],
 	/** fns that map to `keybinds` values */
-	keyfns = {
-		line: _ => {
-			if (points.length < 2) return
-			addSegment("L")
-		},
-		arc: _ => {
-			if (points.length < 2) return
-			addSegment("A")
-		},
-		bezier_quad: _ => {
-			if (points.length < 3 || points.length % 2 === 0) return
-			addSegment("Q", 2)
-		},
-		bezier_cube: _ => {
-			if (points.length < 4 || (points.length - 1) % 3 !== 0) return
-			addSegment("C", 3)
-		},
+	commands = {
+		//STROKES
+		line: _ => points.length > 1 && addSegment("L"),
+		arc: _ => points.length > 1 && addSegment("A"),
+		bezier_quad: _ => points.length > 2 && points.length % 2 !== 0 && addSegment("Q", 2),
+		bezier_cube: _ => points.length > 3 && (points.length - 1) % 3 === 0 && addSegment("C", 3),
+		//STROKE STYLES
 		linecap: _ => {
 			const prev = currentPath.el.getAttribute("stroke-linecap")
 			if (!prev) currentPath.el.setAttribute("stroke-linecap", "round")
@@ -129,9 +119,11 @@ const
 		},
 		width_up: _ => stroke_width(1),
 		width_down: _ => stroke_width(-1),
-		svg: _ => exportRender("image/svg+xml"),
-		// png: _ => exportRender("image/png"),
-		// webp: _ => exportRender("image/webp")
+		//EXPORTS
+		svg: _ => saveAs("image/svg+xml"),
+		// png: _ => saveAs("image/png"),
+		// webp: _ => saveAs("image/webp")
+		// json: _ => saveAs("json")
 		//TODO add/rm new paths in proper order
 		//TODO handle skipping empty layers
 		layer_up: _ => setPathLayer(1),
@@ -194,7 +186,7 @@ function drawRender() {
 	render.imgSize = { w: canvas.width - grid.offsetX * 2, h: canvas.height - grid.offsetY * 2 }
 	render.img = new Image()
 	render.img.onload = _ => {
-		URL.revokeObjectURL(src)
+		URL.revokeObjectURL(src)//revoke later to prevent img stutter
 		redraw()
 	}
 	render.img.src = src
@@ -291,7 +283,7 @@ function buildSVG() {
 						d += `${point.type[0]}${point.x} ${point.y}`
 						break
 					case "A0":
-						const x = Math.abs(segment[i - 1].x - point.x)
+						const x = Math.abs(segment[i - 1].x - point.x) //TODO default values; make user-moddable
 						const y = Math.abs(segment[i - 1].y - point.y)
 						d += `A${x} ${y} 0 0 0 ${point.x} ${point.y}` //TODO moddable nums
 						break
@@ -322,7 +314,7 @@ function stroke_width(n) {
 
 /** assumes render.(svg|img) is built before reaching this method */
 // currently only exports svg properly
-function exportRender(type = "image/svg+xml") {
+function saveAs(type) {
 	const s = new XMLSerializer().serializeToString(render.svg)
 	const a = document.createElement("a")
 	a.download = `pegboard-${new Date().getTime()}`
@@ -390,7 +382,7 @@ function keydown(e) {
 			break
 		default:
 			const f = keybinds[shift.down ? 1 : 0][k]
-			if (f) keyfns[f]()
+			if (f) commands[f]()
 	}
 }
 
