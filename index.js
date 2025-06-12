@@ -117,8 +117,8 @@ const
 			render.img = null
 			draw()
 		},
-		width_up: _ => stroke_width(1),
-		width_down: _ => stroke_width(-1),
+		width_up: _ => strokeWidth(1),
+		width_down: _ => strokeWidth(-1),
 		//EXPORTS
 		svg: _ => saveAs("image/svg+xml"),
 		// png: _ => saveAs("image/png"),
@@ -290,9 +290,9 @@ function buildSVG() {
 	}
 }
 
-function stroke_width(n) {
+function strokeWidth(n) {
 	const prev = currentPath.el.getAttribute("stroke-width")
-	const curr = parseInt(prev) + n
+	const curr = (parseInt(prev) || 1) + n
 	if (curr > 1) currentPath.el.setAttribute("stroke-width", curr)
 	else currentPath.el.removeAttribute("stroke-width")
 	if (currentPath.el.getAttribute("stroke-width") !== prev) {
