@@ -128,27 +128,20 @@ const
 		//TODO handle skipping empty layers
 		layer_up: _ => setPathLayer(1),
 		layer_down: _ => setPathLayer(-1),
-	}
+	},
+	guiHidden = { keyboard: false, tutorial: false }
 
 let
-	guiHidden = false,
 	clickdown,
 	clickup, //TODO might remove
 	currentLayer = 0,
 	currentPath = paths[0]
 
-function toggleGUI() {
-	if (guiHidden) {
-		for (const c of document.querySelector("aside").children) {
-			c.classList.remove("hide")
-		}
-	} else {
-		for (const c of document.querySelector("aside").children) {
-			c.classList.add("hide")
-		}
-	}
+function toggleGUI(id) {
+	if (guiHidden[id]) document.getElementById(id).classList.remove("hide")
+	else document.getElementById(id).classList.add("hide")
 
-	guiHidden = !guiHidden
+	guiHidden[id] = !guiHidden[id]
 }
 
 function drawGrid() {

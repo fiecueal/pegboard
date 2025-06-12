@@ -13,9 +13,13 @@
 <body>
   <canvas id="canvas"></canvas>
   <aside>
-    <button style="display: block !important" onclick="toggleGUI()">
-      toggle GUI
+    <button style="display: inline !important" onclick="toggleGUI('keyboard')">
+      toggle keyboard
     </button>
+    <button style="display: inline !important" onclick="toggleGUI('tutorial')">
+      toggle tutorial
+    </button>
+    <!-- TODO more semantic HTML -->
     <div id="keyboard">
       <button id="q" onclick="keydown({key: 'q'})">Q</button>
       <button id="w" onclick="keydown({key: 'w'})">W</button>
@@ -34,8 +38,20 @@
       <button id="b" onclick="keydown({key: 'b'})">B</button>
       <button id="shift" onclick="keydown({key: 'shift', gui: true})">SHIFT</button>
     </div>
-    <a href="https://github.com/fiecueal/pegboard">source code</a>
-    <!-- TODO add tutorial -->
+    <div id="tutorial">
+      <b>Mouse:</b>
+      <p>
+        <b>left</b> - place 2 or more points on the board to mark where strokes start/end
+        <br>
+        <b>right</b> - delete placed point
+      </p>
+      <b>Keyboard:</b>
+      <p>
+        Hovering on the buttons reveals their function. Stroke command functionality is
+        determined by the number of points placed with left click
+      </p>
+      <a href="https://github.com/fiecueal/pegboard">source code</a>
+    </div>
   </aside>
 </body>
 

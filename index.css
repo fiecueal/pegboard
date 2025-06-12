@@ -27,6 +27,14 @@ aside {
 	:nth-child(n+6) {
 		margin-right: calc(-1 * var(--size))
 	}
+
+	button {
+		background: oklab(1 -0.1 0.1);
+	}
+
+	&:has(#shift.active) button {
+		background: oklab(1 0.1 0.1);
+	}
 }
 
 #a,
@@ -72,4 +80,11 @@ button {
 
 .hide {
 	display: none !important
+}
+
+#tutorial {
+	margin: auto;
+	width: 15rem;
+	border-radius: 5px;
+	background: #fff;
 }
