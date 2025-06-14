@@ -146,6 +146,7 @@ function toggleGUI(id) {
 
 function drawGrid() {
 	if (!grid.visible) return
+	if (grid.img) return ctx.drawImage(grid.img, 0, 0)
 
 	ctx.beginPath()
 	const bigR = grid.gap * 4
@@ -158,6 +159,13 @@ function drawGrid() {
 	}
 	ctx.fillStyle = "darkgrey"
 	ctx.fill()
+
+	canvas.toBlob(blob => {
+		const src = URL.createObjectURL(blob)
+		grid.img = new Image()
+		grid.img.onload = _ => URL.revokeObjectURL(src)
+		grid.img.src = src
+	})
 }
 
 function drawRender() {
@@ -398,6 +406,7 @@ function resize() {
 	grid.offsetX = Math.trunc(canvas.width % grid.gap / 2)
 	grid.offsetY = Math.trunc(canvas.height % grid.gap / 2)
 	buildSVG()  //TODO change ctx.drawImage() dimension args instead
+	grid.img = null
 	draw()
 }
 
