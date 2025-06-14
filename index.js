@@ -236,6 +236,34 @@ function draw() {
 	drawCursor()
 }
 
+function stringifySegment(segment) {
+	d = ""
+	for (let i = 0; i < segment.length; i++) {
+		let point = segment[i]
+		switch (point.type) {
+			case "M":
+			case "L0":
+			case "Q1":
+			case "C1":
+				d += `${point.type[0]}${point.x} ${point.y}`
+				break
+			case "A0":
+				const x = Math.abs(segment[i - 1].x - point.x) //TODO default values; make user-moddable
+				const y = Math.abs(segment[i - 1].y - point.y)
+				d += `A${x} ${y} 0 0 0 ${point.x} ${point.y}`
+				break
+			case "Q0":
+			case "C2":
+			case "C0":
+				d += ` ${point.x} ${point.y}`
+				break
+			default:
+				console.log("bad point type: " + JSON.stringify(point))
+		}
+	}
+	return d
+}
+
 /** count = control points + end point */
 function addSegment(type, count = 1) {
 	const segment = [{ x: points[0][0], y: points[0][1], type: "M" }]
@@ -245,14 +273,16 @@ function addSegment(type, count = 1) {
 	currentPath.d.push(segment)
 
 	points.length = 0
-	render.img = null //TODO don't rebuild; add to svg path.d instead
-	buildSVG()
+	currentPath.el.setAttribute(
+		"d",
+		(currentPath.el.getAttribute("d") || "") + stringifySegment(segment)
+	)
+	render.img = null
 	draw()
 }
 
 //TODO don't build after every action; just add new points as needed; goal: only call before exporting
 //TODO proper layer addition and removal
-// only handles one path atm
 function buildSVG() {
 	render.svg.setAttribute("viewBox", `0 0 ${grid.x} ${grid.y}`) //MAYBE cache viewbox in var for other uses
 	//TODO insert paths at correct index instead of clearing each build
@@ -262,29 +292,7 @@ function buildSVG() {
 		render.svg.appendChild(path.el)
 		let d = ""
 		for (const segment of path.d) {
-			for (let i = 0; i < segment.length; i++) {
-				let point = segment[i]
-				switch (point.type) {
-					case "M":
-					case "L0":
-					case "Q1":
-					case "C1":
-						d += `${point.type[0]}${point.x} ${point.y}`
-						break
-					case "A0":
-						const x = Math.abs(segment[i - 1].x - point.x) //TODO default values; make user-moddable
-						const y = Math.abs(segment[i - 1].y - point.y)
-						d += `A${x} ${y} 0 0 0 ${point.x} ${point.y}` //TODO moddable nums
-						break
-					case "Q0":
-					case "C2":
-					case "C0":
-						d += ` ${point.x} ${point.y}`
-						break
-					default:
-						console.log("bad point.type")
-				}
-			}
+			d += stringifySegment(segment)
 		}
 		path.el.setAttribute("d", d)
 	}
