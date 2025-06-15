@@ -479,26 +479,33 @@ function mouseup(e) {
 					if (!segment.includes(p)) continue
 
 					const i = segment.indexOf(p)
-					if (p.type === "M" && segment[1]) { // p = segment[0]
-						if (segment[1].type === "Q1") segment[2].type = "A0"
-						if (segment[1].type === "C1") {
-							segment[2].type = "Q1"
-							segment[3].type = "Q0"
-						}
-						segment[1].type = "M"
-					} else if (p.type === "Q1") {
-						segment[i + 1].type = "A0"
-					} else if (p.type === "Q0") {
-						segment[i - 1].type = "A0"
-					} else if (p.type === "C1") {
-						segment[i + 1].type = "Q1"
-						segment[i + 2].type = "Q0"
-					} else if (p.type === "C2") {
-						segment[i - 1].type = "Q1"
-						segment[i + 1].type = "Q0"
-					} else if (p.type === "C0") {
-						segment[i - 2].type = "Q1"
-						segment[i - 1].type = "Q0"
+					switch (p.type) {
+						case "M":
+							if (!segment[1]) break
+							if (segment[1].type === "Q1") segment[2].type = "A0"
+							else if (segment[1].type === "C1") {
+								segment[2].type = "Q1"
+								segment[3].type = "Q0"
+							}
+							segment[1].type = "M"
+							break
+						case "Q1":
+							segment[i + 1].type = "A0"
+							break
+						case "Q0":
+							segment[i - 1].type = "A0"
+							break
+						case "C1":
+							segment[i + 1].type = "Q1"
+							segment[i + 2].type = "Q0"
+							break
+						case "C2":
+							segment[i - 1].type = "Q1"
+							segment[i + 1].type = "Q0"
+							break
+						case "C0":
+							segment[i - 2].type = "Q1"
+							segment[i - 1].type = "Q0"
 					}
 					segment.splice(i, 1)
 					break
