@@ -129,7 +129,7 @@ const
 		layer_up: _ => setPathLayer(1),
 		layer_down: _ => setPathLayer(-1),
 	},
-	guiHidden = { keyboard: false, tutorial: false }
+	guiHidden = { all: false, keyboard: false, pathdata: false, tutorial: false }
 
 let
 	clickdown,
@@ -138,6 +138,18 @@ let
 	currentPath = paths[0]
 
 function toggleGUI(id) {
+	if (id === "all") {
+		const fn = guiHidden.all ? "remove" : "add"
+		for (const el of document.getElementById("gui").children) {
+			el.classList[fn]("hide")
+		}
+
+		const flip = !guiHidden.all
+		for (const key in guiHidden) {
+			guiHidden[key] = flip
+		}
+		return
+	}
 	if (guiHidden[id]) document.getElementById(id).classList.remove("hide")
 	else document.getElementById(id).classList.add("hide")
 

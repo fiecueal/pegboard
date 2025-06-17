@@ -2,7 +2,15 @@
 
 Giving [Dotgrid](https://100r.co/site/dotgrid.html) a touchup.
 
-Now: layer CRUD
+Todos:
+- layer CRUD
+- stroke props
+- fill props
+- functional GUI
+- save as png
+- remove that flicker thing on certain actions
+- undo/redo
+- etc etc etc
 
 Goals:
 - feature parity with Dotgrid (mostly)

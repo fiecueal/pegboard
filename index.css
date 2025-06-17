@@ -5,22 +5,42 @@
 	z-index: -1
 }
 
-aside {
+#gui {
+	font-family: sans-serif;
 	position: fixed;
 	top: 1rem;
 	left: 1rem;
+	width: min-content;
 	padding: 0.2rem;
-	border: 2px grey solid;
+	outline: 2px grey solid;
 	border-radius: 5px;
-	background: #0001
+	background: #0001;
+
+	>* {
+		margin: 0.2rem auto;
+		width: fit-content;
+		display: grid;
+		gap: 0.2rem;
+	}
+}
+
+#togglers {
+	display: flex !important;
+
+	* {
+		white-space: nowrap;
+	}
+}
+
+#pathdata,
+#tutorial {
+	border-radius: 5px;
+	background: #fff;
+	min-width: 30ch
 }
 
 #keyboard {
 	--size: 2.5rem;
-	width: min-content;
-	margin: 0.2rem auto;
-	display: grid;
-	gap: 0.2rem;
 	padding-right: calc(var(--size) / 4 * 3);
 	grid-template-columns: repeat(5, 1fr);
 
@@ -78,13 +98,30 @@ button {
 	}
 }
 
+input,
+select,
+#rgb-input {
+	border: none;
+	border-radius: 2px;
+	outline: 1px grey solid
+}
+
+#rgb-input {
+	display: flex;
+
+	&::before {
+		content: "#"
+	}
+
+	* {
+		outline: none
+	}
+}
+
 .hide {
 	display: none !important
 }
 
-#tutorial {
-	margin: auto;
-	width: 15rem;
-	border-radius: 5px;
-	background: #fff;
+b {
+	text-align: center
 }

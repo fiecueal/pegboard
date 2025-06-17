@@ -12,14 +12,14 @@
 
 <body>
   <canvas id="canvas"></canvas>
-  <aside>
-    <button style="display: inline !important" onclick="toggleGUI('keyboard')">
-      toggle keyboard
-    </button>
-    <button style="display: inline !important" onclick="toggleGUI('tutorial')">
-      toggle tutorial
-    </button>
-    <!-- TODO more semantic HTML -->
+  <!-- TODO more semantic HTML -->
+  <aside id="gui">
+    <div id="togglers">
+      <button onclick="toggleGUI('all')">toggle all</button>
+      <button onclick="toggleGUI('keyboard')">keyboard</button>
+      <!-- <button onclick="toggleGUI('pathdata')">path data</button> -->
+      <button onclick="toggleGUI('tutorial')">tutorial</button>
+    </div>
     <div id="keyboard">
       <button id="q" onclick="keydown({key: 'q'})">Q</button>
       <button id="w" onclick="keydown({key: 'w'})">W</button>
@@ -38,16 +38,53 @@
       <button id="b" onclick="keydown({key: 'b'})">B</button>
       <button id="shift" onclick="keydown({key: 'shift', gui: true})">SHIFT</button>
     </div>
+    <!-- KEEP HIDDEN UNTIL IT ACTUALLY DOES SOMETHING -->
+<!--     <div id="pathdata">
+      <b style="grid-column: span 2">Path data</b>
+      <label for="stroke-width">stroke width</label>
+      <input id="stroke-width" type="number" value="1" min="1">
+
+      <label for="stroke">stroke color</label>
+      <div id="rgb-input">
+        <input id="stroke" value="000" maxlength="6">
+      </div>
+
+      <label for="stroke-linecap">linecap</label>
+      <select id="stroke-linecap">
+        <option>butt</option>
+        <option>round</option>
+        <option>square</option>
+      </select>
+
+      <label for="stroke-linejoin">linejoin</label>
+      <select id="stroke-linejoin">
+        <option>miter</option>
+        <option>miter-clip</option>
+        <option>round</option>
+        <option>arcs</option>
+        <option>bevel</option>
+      </select>
+
+      <label for="fill">fill color</label>
+      <div id="rgb-input">
+        <input id="fill" value="000" maxlength="6">
+      </div>
+    </div> -->
     <div id="tutorial">
-      <b>Mouse:</b>
-      <p>
-        <b>left</b> - place 2 or more points on the board to mark where strokes start/end
-        <br>
-        <b>middle</b> - scroll to zoom in/out<!-- hold and drag to move canvas -->
-        <br>
-        <b>right</b> - delete placed point
-      </p>
-      <b>Keyboard:</b>
+      <b>Mouse</b>
+      <dl>
+        <dt>left</dt>
+        <dd>click to place points</dd>
+        <dd>hold and drag to move points</dd>
+
+        <dt>middle</dt>
+        <dd>scroll to zoom in/out</dd>
+        <!-- TODO <dd>hold and drag to move canvas</dd> -->
+
+        <dt>right</dt>
+        <dd>click to delete points</dd>
+      </dl>
+      <b>Keyboard</b>
       <p>
         Hovering on the buttons reveals their function. Stroke command functionality is
         determined by the number of points placed with left click
