@@ -257,7 +257,7 @@ function draw() {
 }
 
 function stringifySegment(segment) {
-	d = ""
+	let d = ""
 	for (let i = 0; i < segment.length; i++) {
 		let point = segment[i]
 		switch (point.type) {
