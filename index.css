@@ -1,3 +1,17 @@
+* {
+	font-family: sans-serif;
+	line-height: 1.1;
+}
+
+b {
+	text-align: center
+}
+
+p,
+dl {
+	margin: 0 1ch
+}
+
 #canvas {
 	position: fixed;
 	top: 0;
@@ -6,7 +20,6 @@
 }
 
 #gui {
-	font-family: sans-serif;
 	position: fixed;
 	top: 1rem;
 	left: 1rem;
@@ -20,23 +33,20 @@
 		margin: 0.2rem auto;
 		width: fit-content;
 		display: grid;
-		gap: 0.2rem;
+		gap: 0.2rem
 	}
 }
 
 #togglers {
-	display: flex !important;
-
-	* {
-		white-space: nowrap;
-	}
+	display: flex !important
 }
 
 #pathdata,
 #tutorial {
+	width: 100%;
+	min-width: 26ch;
 	border-radius: 5px;
-	background: #fff;
-	min-width: 30ch
+	background: #fff
 }
 
 #keyboard {
@@ -83,6 +93,7 @@ button {
 	background: #fff;
 	width: var(--size);
 	height: var(--size);
+	white-space: nowrap;
 
 	&:hover {
 		filter: brightness(0.9)
@@ -101,6 +112,8 @@ button {
 input,
 select,
 #rgb-input {
+	min-width: 9ch;
+	padding-left: 2px;
 	border: none;
 	border-radius: 2px;
 	outline: 1px grey solid
@@ -110,18 +123,22 @@ select,
 	display: flex;
 
 	&::before {
+		align-content: center;
 		content: "#"
 	}
 
-	* {
-		outline: none
+	input {
+		outline: none;
+		flex: 1
 	}
+}
+
+#rgb-input:has(input:invalid),
+input:invalid {
+	color: maroon;
+	background: lightcoral
 }
 
 .hide {
 	display: none !important
-}
-
-b {
-	text-align: center
 }

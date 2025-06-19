@@ -17,7 +17,7 @@
     <div id="togglers">
       <button onclick="toggleGUI('all')">toggle all</button>
       <button onclick="toggleGUI('keyboard')">keyboard</button>
-      <!-- <button onclick="toggleGUI('pathdata')">path data</button> -->
+      <button onclick="toggleGUI('pathdata')">path data</button>
       <button onclick="toggleGUI('tutorial')">tutorial</button>
     </div>
     <div id="keyboard">
@@ -38,38 +38,56 @@
       <button id="b" onclick="keydown({key: 'b'})">B</button>
       <button id="shift" onclick="keydown({key: 'shift', gui: true})">SHIFT</button>
     </div>
-    <!-- KEEP HIDDEN UNTIL IT ACTUALLY DOES SOMETHING -->
-<!--     <div id="pathdata">
-      <b style="grid-column: span 2">Path data</b>
-      <label for="stroke-width">stroke width</label>
-      <input id="stroke-width" type="number" value="1" min="1">
+    <div id="pathdata">
+      <b style="grid-column: span 2">Stroke</b>
 
-      <label for="stroke">stroke color</label>
+      <label for="stroke">color</label>
       <div id="rgb-input">
-        <input id="stroke" value="000" maxlength="6">
+        <input id="stroke" data-numtype="rgb" maxlength="6"
+          pattern="[0-9a-fA-F]{3}|[0-9a-fA-F]{6}" value="000">
       </div>
 
       <label for="stroke-linecap">linecap</label>
       <select id="stroke-linecap">
-        <option>butt</option>
+        <option selected>butt</option>
         <option>round</option>
         <option>square</option>
       </select>
 
       <label for="stroke-linejoin">linejoin</label>
       <select id="stroke-linejoin">
-        <option>miter</option>
+        <option selected>miter</option>
         <option>miter-clip</option>
         <option>round</option>
         <option>arcs</option>
         <option>bevel</option>
       </select>
 
-      <label for="fill">fill color</label>
+      <label for="stroke-opacity">opacity</label>
+      <input id="stroke-opacity" type="number" data-numtype="opacity" value="100" min="0"
+        max="100">
+
+      <label for="stroke-width">width</label>
+      <input id="stroke-width" type="number" data-numtype="width" value="1" min="1">
+
+      <b style="grid-column: span 2">Fill</b>
+
+      <label for="fill">color</label>
       <div id="rgb-input">
-        <input id="fill" value="000" maxlength="6">
+        <input id="fill" data-numtype="rgb" maxlength="6"
+          pattern="[0-9a-fA-F]{3}|[0-9a-fA-F]{6}" value="000">
       </div>
-    </div> -->
+
+      <label for="fill-opacity">opacity</label>
+      <input id="fill-opacity" type="number" data-numtype="opacity" value="100" min="0"
+        max="100">
+
+      <label for="fill-rule">rule</label>
+      <select id="fill-rule">
+        <option selected>nonzero</option>
+        <option>evenodd</option>
+      </select>
+    </div>
     <div id="tutorial">
       <b>Mouse</b>
       <dl>

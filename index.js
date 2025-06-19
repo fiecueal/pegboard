@@ -543,10 +543,42 @@ canvas.addEventListener("mousedown", mousedown)
 canvas.addEventListener("mouseup", mouseup)
 canvas.addEventListener("contextmenu", e => e.preventDefault())
 
-//STARTUP STUFF
-setKeybindLayer(0)
-resize()
-
 render.svg.setAttribute("xmlns", "http://www.w3.org/2000/svg")
 render.svg.setAttribute("stroke", "#000")
 render.svg.setAttribute("fill", "none")
+
+for (const el of document.getElementById("pathdata").children) {
+	if (el.nodeName !== "LABEL") continue
+
+	const attr = el.getAttribute("for")
+	const input = document.getElementById(attr)
+
+	if (input.nodeName === "SELECT") input.addEventListener("change", _ => {
+		if (input.selectedOptions[0].defaultSelected) currentPath.el.removeAttribute(attr)
+		else currentPath.el.setAttribute(attr, input.value)
+
+		render.img = null
+		draw()
+	})
+
+	else input.addEventListener("input", _ => {
+		if (!input.checkValidity()) return
+
+		switch (input.dataset.numtype) {
+			case "rgb":
+				currentPath.el.setAttribute(attr, "#" + input.value)
+				break
+			case "width":
+				currentPath.el.setAttribute(attr, parseInt(input.value))
+				break
+			case "opacity":
+				currentPath.el.setAttribute(attr, parseInt(input.value) / 100)
+		}
+
+		render.img = null
+		draw()
+	})
+}
+
+setKeybindLayer(0)
+resize()
