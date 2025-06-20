@@ -399,6 +399,7 @@ function setKeybindLayer(l) {
 
 function keydown(e) {
 	if (e.repeat) return
+	if (e.target.nodeName === "INPUT") return
 	const k = e.key.toLowerCase()
 
 	switch (k) {
@@ -432,6 +433,7 @@ function keydown(e) {
 
 function keyup(e) {
 	if (e.key !== "Shift") return
+	if (e.target.nodeName === "INPUT") return
 	shift.held = shift.toggled = false
 	shift.b.classList.remove("active")
 	setKeybindLayer(0)
