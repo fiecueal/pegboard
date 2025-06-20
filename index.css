@@ -44,7 +44,6 @@ dl {
 #pathdata,
 #tutorial {
 	width: 100%;
-	min-width: 26ch;
 	border-radius: 5px;
 	background: #fff
 }
@@ -112,7 +111,6 @@ button {
 input,
 select,
 #rgb-input {
-	min-width: 9ch;
 	padding-left: 2px;
 	border: none;
 	border-radius: 2px;

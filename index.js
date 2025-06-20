@@ -415,6 +415,7 @@ function resize() {
 	grid.x = Math.trunc(canvas.width / grid.gap)
 	grid.y = Math.trunc(canvas.height / grid.gap)
 	// offsets pegs from top-left so that they are centered in the viewport
+	//MAYBE set offset static instead
 	grid.offsetX = Math.trunc(canvas.width % grid.gap / 2)
 	grid.offsetY = Math.trunc(canvas.height % grid.gap / 2)
 	buildSVG()  //TODO change ctx.drawImage() dimension args instead

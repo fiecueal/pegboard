@@ -10,6 +10,7 @@ Todos:
 - save as png
 - remove that flicker thing on certain actions
 - undo/redo
+- dragging canvas
 - etc etc etc
 
 Goals:
