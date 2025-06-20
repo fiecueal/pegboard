@@ -544,7 +544,7 @@ canvas.addEventListener("mouseup", mouseup)
 canvas.addEventListener("contextmenu", e => e.preventDefault())
 
 render.svg.setAttribute("xmlns", "http://www.w3.org/2000/svg")
-render.svg.setAttribute("stroke", "#000")
+render.svg.setAttribute("stroke", "#000") //MAYBE delete or handle default path values better
 render.svg.setAttribute("fill", "none")
 
 for (const el of document.getElementById("pathdata").children) {
