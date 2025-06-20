@@ -399,7 +399,7 @@ function setKeybindLayer(l) {
 
 function keydown(e) {
 	if (e.repeat) return
-	if (e.target.nodeName === "INPUT") return
+	if (e.target?.tagName === "INPUT") return
 	const k = e.key.toLowerCase()
 
 	switch (k) {
@@ -433,7 +433,7 @@ function keydown(e) {
 
 function keyup(e) {
 	if (e.key !== "Shift") return
-	if (e.target.nodeName === "INPUT") return
+	if (e.target?.tagName === "INPUT") return
 	shift.held = shift.toggled = false
 	shift.b.classList.remove("active")
 	setKeybindLayer(0)
@@ -579,12 +579,12 @@ render.svg.setAttribute("stroke", "#000") //MAYBE delete or handle default path 
 render.svg.setAttribute("fill", "none")
 
 for (const el of document.getElementById("pathdata").children) {
-	if (el.nodeName !== "LABEL") continue
+	if (el.tagName !== "LABEL") continue
 
 	const attr = el.getAttribute("for")
 	const input = document.getElementById(attr)
 
-	if (input.nodeName === "SELECT") input.addEventListener("change", _ => {
+	if (input.tagName === "SELECT") input.addEventListener("change", _ => {
 		if (input.selectedOptions[0].defaultSelected) currentPath.el.removeAttribute(attr)
 		else currentPath.el.setAttribute(attr, input.value)
 
