@@ -478,8 +478,8 @@ function mouseup(e) {
 				point.x = clickup.x
 				point.y = clickup.y
 			}
-			render.img = null
 			buildSVG()
+			render.img = null
 			draw()
 			break
 		case 2: //TODO not broken but it looks atrocious
@@ -524,8 +524,8 @@ function mouseup(e) {
 				}
 			}
 
-			render.img = null
 			buildSVG()
+			render.img = null
 			draw()
 			break
 	}

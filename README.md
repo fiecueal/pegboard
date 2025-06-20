@@ -11,6 +11,7 @@ Todos:
 - remove that flicker thing on certain actions
 - undo/redo
 - dragging canvas
+- tutorial/instruction page
 - etc etc etc
 
 Goals:
