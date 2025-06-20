@@ -565,7 +565,8 @@ for (const el of document.getElementById("pathdata").children) {
 	else input.addEventListener("input", _ => {
 		if (!input.checkValidity()) return
 
-		switch (input.dataset.numtype) {
+		if (input.value === input.defaultValue) currentPath.el.removeAttribute(attr)
+		else switch (input.dataset.numtype) {
 			case "rgb":
 				currentPath.el.setAttribute(attr, "#" + input.value)
 				break
