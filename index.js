@@ -73,6 +73,7 @@ const
 			g: "width_down",
 			z: "linecap",
 			x: "linejoin",
+			c: "fillrule",
 			// c: "close",
 			// v: "fill",
 			// rect: "z",
@@ -99,24 +100,9 @@ const
 		bezier_quad: _ => points.length > 2 && points.length % 2 !== 0 && addSegment("Q", 2),
 		bezier_cube: _ => points.length > 3 && (points.length - 1) % 3 === 0 && addSegment("C", 3),
 		//STROKE STYLES
-		linecap: _ => {
-			const prev = currentPath.el.getAttribute("stroke-linecap")
-			if (!prev) currentPath.el.setAttribute("stroke-linecap", "round")
-			else if (prev === "round") currentPath.el.setAttribute("stroke-linecap", "square")
-			else if (prev === "square") currentPath.el.removeAttribute("stroke-linecap")
-			render.img = null
-			draw()
-		},
-		linejoin: _ => {
-			const prev = currentPath.el.getAttribute("stroke-linejoin")
-			if (!prev) currentPath.el.setAttribute("stroke-linejoin", "miter-clip")
-			else if (prev === "miter-clip") currentPath.el.setAttribute("stroke-linejoin", "round")
-			else if (prev === "round") currentPath.el.setAttribute("stroke-linejoin", "arcs")
-			else if (prev === "arcs") currentPath.el.setAttribute("stroke-linejoin", "bevel")
-			else if (prev === "bevel") currentPath.el.removeAttribute("stroke-linejoin")
-			render.img = null
-			draw()
-		},
+		linecap: _ => cycleAttrOpts("stroke-linecap", ["butt", "round", "square"]),
+		linejoin: _ => cycleAttrOpts("stroke-linejoin", ["miter", "miter-clip", "round", "arcs", "bevel"]),
+		fillrule: _ => cycleAttrOpts("fill-rule", ["nonzero", "evenodd"]),
 		width_up: _ => strokeWidth(1),
 		width_down: _ => strokeWidth(-1),
 		//EXPORTS
@@ -316,6 +302,19 @@ function buildSVG() {
 		}
 		path.el.setAttribute("d", d)
 	}
+}
+
+function cycleAttrOpts(attr, opts) {
+	const prev = currentPath.el.getAttribute(attr) || opts[0]
+	const next = opts[(opts.indexOf(prev) + 1) % opts.length]
+
+	if (next === opts[0]) currentPath.el.removeAttribute(attr)
+	else currentPath.el.setAttribute(attr, next)
+
+	document.getElementById(attr).value = next
+
+	render.img = null
+	draw()
 }
 
 function strokeWidth(n) {
