@@ -65,12 +65,16 @@ const
 	/** [0] = base layer; [1] = shift layer */
 	keybinds = [
 		{
-			t: "width_up",
-			a: "line",
-			s: "arc",
-			d: "bezier_quad",
-			f: "bezier_cube",
-			g: "width_down",
+			q: "width_up",
+			w: "stroke_opacity_up",
+			e: "fill_opacity_up",
+			r: "bezier_quad",
+			t: "bezier_cube",
+			a: "width_down",
+			s: "stroke_opacity_down",
+			d: "fill_opacity_down",
+			f: "line",
+			g: "arc",
 			z: "linecap",
 			x: "linejoin",
 			c: "fillrule",
@@ -103,8 +107,12 @@ const
 		linecap: _ => cycleAttrOpts("stroke-linecap", ["butt", "round", "square"]),
 		linejoin: _ => cycleAttrOpts("stroke-linejoin", ["miter", "miter-clip", "round", "arcs", "bevel"]),
 		fillrule: _ => cycleAttrOpts("fill-rule", ["nonzero", "evenodd"]),
-		width_up: _ => strokeWidth(1),
-		width_down: _ => strokeWidth(-1),
+		width_up: _ => updateWidth(1),
+		width_down: _ => updateWidth(-1),
+		stroke_opacity_up: _ => updateOpacity("stroke-opacity", 10),
+		stroke_opacity_down: _ => updateOpacity("stroke-opacity", -10),
+		fill_opacity_up: _ => updateOpacity("fill-opacity", 10),
+		fill_opacity_down: _ => updateOpacity("fill-opacity", -10),
 		//EXPORTS
 		svg: _ => saveAs("image/svg+xml"),
 		// png: _ => saveAs("image/png"),
@@ -270,7 +278,7 @@ function stringifySegment(segment) {
 	return d
 }
 
-/** count = control points + end point */
+/** count = control points + end point for beziers */
 function addSegment(type, count = 1) {
 	const segment = [{ x: points[0][0], y: points[0][1], type: "M" }]
 	for (let i = 1; i < points.length; i++) {
@@ -317,12 +325,33 @@ function cycleAttrOpts(attr, opts) {
 	draw()
 }
 
-function strokeWidth(n) {
-	const prev = currentPath.el.getAttribute("stroke-width")
-	const curr = (parseInt(prev) || 1) + n
-	if (curr > 1) currentPath.el.setAttribute("stroke-width", curr)
+function updateWidth(n) {
+	const prev = parseInt(currentPath.el.getAttribute("stroke-width")) || 1
+	const next = Math.max(prev + n, 1)
+
+	if (next > 1) currentPath.el.setAttribute("stroke-width", next)
 	else currentPath.el.removeAttribute("stroke-width")
-	if (currentPath.el.getAttribute("stroke-width") !== prev) {
+
+	document.getElementById("stroke-width").value = next
+
+	if (next !== prev) {
+		render.img = null
+		draw()
+	}
+}
+
+function updateOpacity(attr, n) {
+	let prev = parseFloat(currentPath.el.getAttribute(attr)) * 100
+	// js bruh moment: 0 is falsy
+	if (prev !== 0) prev ||= 100
+	const next = Math.min(Math.max(prev + n, 0), 100)
+
+	if (next < 100) currentPath.el.setAttribute(attr, next / 100)
+	else currentPath.el.removeAttribute(attr)
+
+	document.getElementById(attr).value = next
+
+	if (next !== prev) {
 		render.img = null
 		draw()
 	}
