@@ -4,6 +4,8 @@ Giving [Dotgrid](https://100r.co/site/dotgrid.html) a touchup.
 
 Todos:
 - layer CRUD
+- show current layer
+- update #pathdata on layer switch
 - stroke props
 - fill props
 - functional GUI
@@ -12,6 +14,8 @@ Todos:
 - undo/redo
 - dragging canvas
 - tutorial/instruction page
+- delete all points
+- render preview toggle
 - etc etc etc
 
 Goals:
