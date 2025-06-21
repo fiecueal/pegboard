@@ -3,7 +3,8 @@
 	line-height: 1.1;
 }
 
-a, b {
+a,
+b {
 	text-align: center
 }
 
@@ -24,6 +25,7 @@ dl {
 	top: 1rem;
 	left: 1rem;
 	width: min-content;
+	max-height: calc(100vh - 2.4rem);
 	padding: 0.2rem;
 	outline: 2px grey solid;
 	border-radius: 5px;
