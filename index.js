@@ -556,6 +556,7 @@ function mouseup(e) {
 							segment[i - 1].type = "Q0"
 					}
 					segment.splice(i, 1)
+					if (segment.length === 0) currentPath.d.splice(currentPath.d.indexOf(segment), 1)
 					break
 				}
 			}
