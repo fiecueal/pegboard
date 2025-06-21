@@ -275,6 +275,11 @@ function stringifySegment(segment) {
 				console.log("bad point type: " + JSON.stringify(point))
 		}
 	}
+
+	const first = segment[0]
+	const last = segment[segment.length - 1]
+	if (first.x === last.x && first.y === last.y) d += "Z"
+
 	return d
 }
 
