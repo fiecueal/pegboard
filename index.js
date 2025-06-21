@@ -388,10 +388,10 @@ function setKeybindLayer(l) {
 	for (const k of "qwertasdfgzxcvb") {
 		const b = document.getElementById(k)
 		if (keybinds[l][k]) {
-			b.title = keybinds[l][k]
+			b.nextElementSibling.textContent = keybinds[l][k]
 			b.disabled = false
 		} else {
-			b.removeAttribute("title")
+			b.nextElementSibling.textContent = null
 			b.disabled = true
 		}
 	}
