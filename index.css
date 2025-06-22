@@ -8,6 +8,10 @@ b {
 	text-align: center
 }
 
+#pathdata b {
+	grid-column: span 2
+}
+
 p,
 dl {
 	margin: 0 1ch
