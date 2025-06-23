@@ -85,9 +85,9 @@ const
 		},
 		{
 			// a: "json",
-			t: "layer_up",
-			s: "svg",
-			g: "layer_down"
+			t: "raise_layer",
+			s: "save_as_svg",
+			g: "lower_layer"
 			// d: "png",
 			// f: "webp",
 			// z: "undo",
@@ -114,14 +114,14 @@ const
 		raise_fill_opacity: _ => updateOpacity("fill-opacity", 10),
 		lower_fill_opacity: _ => updateOpacity("fill-opacity", -10),
 		//EXPORTS
-		svg: _ => saveAs("image/svg+xml"),
+		save_as_svg: _ => saveAs("image/svg+xml"),
 		// png: _ => saveAs("image/png"),
 		// webp: _ => saveAs("image/webp")
 		// json: _ => saveAs("json")
 		//TODO add/rm new paths in proper order
 		//TODO handle skipping empty layers
-		layer_up: _ => setPathLayer(1),
-		layer_down: _ => setPathLayer(-1),
+		raise_layer: _ => setCurrentPath(currentLayer + 1),
+		lower_layer: _ => setCurrentPath(currentLayer - 1),
 	},
 	guiHidden = { all: false, keyboard: false, pathdata: false, tutorial: false }
 
@@ -381,11 +381,11 @@ function saveAs(type) {
 	// c.toBlob()
 }
 
-function setPathLayer(d) {
-	currentLayer = Math.max(currentLayer + d, 0)
+function setCurrentPath(d) {
+	currentLayer = Math.min(Math.max(d, 0), paths.length)
 	paths[currentLayer] ||= { el: document.createElementNS("http://www.w3.org/2000/svg", "path"), d: [] }
 	currentPath = paths[currentLayer]
-	render.svg.appendChild(currentPath.el)
+	render.svg.appendChild(currentPath.el) //TODO insert at correct index
 	draw()
 }
 
