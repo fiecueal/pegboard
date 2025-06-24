@@ -616,7 +616,7 @@ for (const el of document.getElementById("pathdata").children) {
 
 	else if (input.dataset.target === "layer") input.addEventListener(
 		"change",
-		_ => input.checkValidity() && setCurrentPath(parseInt(l))
+		_ => input.checkValidity() && setCurrentPath(parseInt(input.value))
 	)
 
 	else input.addEventListener("input", _ => {
