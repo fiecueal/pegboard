@@ -28,7 +28,7 @@ const
 		offsetX: 0,
 		/** `grid.offsetX` Y axis edition */
 		offsetY: 0,
-		_gap: 15,
+		_gap: 15, //MAYBE infinite zoom... somehow
 		set gap(n) { this._gap = Math.min(Math.max(n, 10), 20) },
 		get gap() { return this._gap },
 		visible: true,
@@ -62,7 +62,10 @@ const
 	],
 	/** points before they get added to the path */
 	points = [],
-	/** [0] = base layer; [1] = shift layer */
+	/** keyboard keys tied to command names/tooltips
+	 * [0] = base
+	 * [1] = shift
+	 */
 	keybinds = [
 		{
 			q: "raise_stroke_width",
@@ -383,7 +386,11 @@ function saveAs(type) {
 
 /** @param {number} d should already be an int */
 function setCurrentPath(d) {
-	currentLayer = Math.min(Math.max(d, 0), paths.length)
+	const l = Math.min(Math.max(d, 0), paths.length)
+	if (l === currentLayer) return
+
+	currentLayer = l
+
 	paths[currentLayer] ||= { el: document.createElementNS("http://www.w3.org/2000/svg", "path"), d: [] }
 	currentPath = paths[currentLayer]
 	render.svg.appendChild(currentPath.el) //TODO insert at correct index
@@ -391,7 +398,7 @@ function setCurrentPath(d) {
 	for (const label of document.getElementById("pathdata").children) {
 		if (label.tagName !== "LABEL") continue
 
-		const el = document.getElementById(label.getAttribute("for"))
+		const el = document.getElementById(label.htmlFor)
 		if (el.tagName === "SELECT") el.value = currentPath.el.getAttribute(el.id) || el.options[0].label
 		else if (el.dataset.target === "layer") document.getElementById("current-layer").value = currentLayer
 		else switch (el.dataset.numtype) {
@@ -600,38 +607,37 @@ canvas.addEventListener("mousedown", mousedown)
 canvas.addEventListener("mouseup", mouseup)
 canvas.addEventListener("contextmenu", e => e.preventDefault())
 
-for (const el of document.getElementById("pathdata").children) {
-	if (el.tagName !== "LABEL") continue
+for (const label of document.getElementById("pathdata").children) {
+	if (label.tagName !== "LABEL") continue
 
-	const attr = el.getAttribute("for")
-	const input = document.getElementById(attr)
+	const el = document.getElementById(label.htmlFor)
 
-	if (input.tagName === "SELECT") input.addEventListener("change", _ => {
-		if (input.selectedOptions[0].defaultSelected) currentPath.el.removeAttribute(attr)
-		else currentPath.el.setAttribute(attr, input.value)
+	if (el.tagName === "SELECT") el.addEventListener("change", _ => {
+		if (el.selectedOptions[0].defaultSelected) currentPath.el.removeAttribute(el.id)
+		else currentPath.el.setAttribute(el.id, el.value)
 
 		render.img = null
 		draw()
 	})
 
-	else if (input.dataset.target === "layer") input.addEventListener(
+	else if (el.dataset.target === "layer") el.addEventListener(
 		"change",
-		_ => input.checkValidity() && setCurrentPath(parseInt(input.value))
+		_ => el.checkValidity() && setCurrentPath(parseInt(el.value))
 	)
 
-	else input.addEventListener("input", _ => {
-		if (!input.checkValidity()) return
+	else el.addEventListener("input", _ => {
+		if (!el.checkValidity()) return
 
-		if (input.value === input.defaultValue) currentPath.el.removeAttribute(attr)
-		else switch (input.dataset.numtype) {
+		if (el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
+		else switch (el.dataset.numtype) {
 			case "rgb":
-				currentPath.el.setAttribute(attr, "#" + input.value)
+				currentPath.el.setAttribute(el.id, "#" + el.value)
 				break
 			case "width":
-				currentPath.el.setAttribute(attr, parseInt(input.value))
+				currentPath.el.setAttribute(el.id, parseInt(el.value))
 				break
-			case "opacity":
-				currentPath.el.setAttribute(attr, parseInt(input.value) / 100)
+			case "percent":
+				currentPath.el.setAttribute(el.id, parseInt(el.value) / 100)
 		}
 
 		render.img = null

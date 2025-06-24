@@ -84,6 +84,7 @@
       <button id="shift" onclick="keydown({key: 'shift', gui: true})">SHIFT</button>
     </div>
     <div id="pathdata">
+      <!-- TODO leave focus on enter/escape -->
       <label for="current-layer">current layer</label>
       <input id="current-layer" type="number" data-target="layer" min="0" value="0">
 
@@ -111,11 +112,11 @@
       </select>
 
       <label for="stroke-opacity">opacity</label>
-      <input id="stroke-opacity" type="number" data-numtype="opacity" value="100" min="0"
-             max="100">
+      <input id="stroke-opacity" type="number" data-numtype="percent" min="0" max="100"
+             value="100">
 
       <label for="stroke-width">width</label>
-      <input id="stroke-width" type="number" data-numtype="width" value="1" min="1">
+      <input id="stroke-width" type="number" data-numtype="width" min="1" value="1">
 
       <b>Fill</b>
 
@@ -125,8 +126,8 @@
       </div>
 
       <label for="fill-opacity">opacity</label>
-      <input id="fill-opacity" type="number" data-numtype="opacity" value="100" min="0"
-             max="100">
+      <input id="fill-opacity" type="number" data-numtype="percent" min="0" max="100"
+             value="100">
 
       <label for="fill-rule">rule</label>
       <select id="fill-rule">
