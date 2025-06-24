@@ -17,6 +17,10 @@ dl {
 	margin: 0 1ch
 }
 
+label {
+	white-space: nowrap;
+}
+
 #canvas {
 	position: fixed;
 	top: 0;
@@ -30,6 +34,7 @@ dl {
 	left: 1rem;
 	width: min-content;
 	max-height: calc(100vh - 2.4rem);
+	overflow-y: scroll;
 	padding: 0.2rem;
 	outline: 2px grey solid;
 	border-radius: 5px;
@@ -124,6 +129,7 @@ button {
 input,
 select,
 #rgb-input {
+	min-width: 9ch;
 	padding-left: 2px;
 	border: none;
 	border-radius: 2px;

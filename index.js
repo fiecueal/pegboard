@@ -381,11 +381,31 @@ function saveAs(type) {
 	// c.toBlob()
 }
 
+/** @param {number} d should already be an int */
 function setCurrentPath(d) {
 	currentLayer = Math.min(Math.max(d, 0), paths.length)
 	paths[currentLayer] ||= { el: document.createElementNS("http://www.w3.org/2000/svg", "path"), d: [] }
 	currentPath = paths[currentLayer]
 	render.svg.appendChild(currentPath.el) //TODO insert at correct index
+
+	for (const label of document.getElementById("pathdata").children) {
+		if (label.tagName !== "LABEL") continue
+
+		const el = document.getElementById(label.getAttribute("for"))
+		if (el.tagName === "SELECT") el.value = currentPath.el.getAttribute(el.id) || el.options[0].label
+		else if (el.dataset.target === "layer") document.getElementById("current-layer").value = currentLayer
+		else switch (el.dataset.numtype) {
+			case "rgb":
+				el.value = currentPath.el.getAttribute(el.id)?.substring(1) || el.defaultValue
+				break
+			case "width":
+				el.value = currentPath.el.getAttribute(el.id) || el.defaultValue
+				break
+			case "opacity":
+				el.value = parseFloat(currentPath.el.getAttribute(el.id)) * 100 || el.defaultValue
+		}
+	}
+
 	draw()
 }
 
@@ -594,6 +614,11 @@ for (const el of document.getElementById("pathdata").children) {
 		draw()
 	})
 
+	else if (input.dataset.target === "layer") input.addEventListener(
+		"change",
+		_ => input.checkValidity() && setCurrentPath(parseInt(l))
+	)
+
 	else input.addEventListener("input", _ => {
 		if (!input.checkValidity()) return
 
@@ -618,5 +643,6 @@ render.svg.setAttribute("xmlns", "http://www.w3.org/2000/svg")
 render.svg.setAttribute("stroke", "#000") //MAYBE delete or handle default path values better
 render.svg.setAttribute("fill", "none")
 
+setCurrentPath(0)
 setKeybindLayer(0)
 resize()
