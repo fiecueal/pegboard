@@ -92,7 +92,7 @@
 
       <label for="stroke">color</label>
       <div id="rgb-input">
-        <input id="stroke" data-numtype="rgb" maxlength="6" pattern="([0-9a-fA-F]{3})*">
+        <input id="stroke" data-target="rgb" maxlength="6" pattern="([0-9a-fA-F]{3})*">
       </div>
 
       <label for="stroke-linecap">linecap</label>
@@ -112,21 +112,21 @@
       </select>
 
       <label for="stroke-opacity">opacity</label>
-      <input id="stroke-opacity" type="number" data-numtype="percent" min="0" max="100"
+      <input id="stroke-opacity" type="number" data-target="percent" min="0" max="100"
              value="100">
 
       <label for="stroke-width">width</label>
-      <input id="stroke-width" type="number" data-numtype="width" min="1" value="1">
+      <input id="stroke-width" type="number" data-target="width" min="1" value="1">
 
       <b>Fill</b>
 
       <label for="fill">color</label>
       <div id="rgb-input">
-        <input id="fill" data-numtype="rgb" maxlength="6" pattern="([0-9a-fA-F]{3})*">
+        <input id="fill" data-target="rgb" maxlength="6" pattern="([0-9a-fA-F]{3})*">
       </div>
 
       <label for="fill-opacity">opacity</label>
-      <input id="fill-opacity" type="number" data-numtype="percent" min="0" max="100"
+      <input id="fill-opacity" type="number" data-target="percent" min="0" max="100"
              value="100">
 
       <label for="fill-rule">rule</label>

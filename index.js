@@ -400,16 +400,18 @@ function setCurrentPath(d) {
 
 		const el = document.getElementById(label.htmlFor)
 		if (el.tagName === "SELECT") el.value = currentPath.el.getAttribute(el.id) || el.options[0].label
-		else if (el.dataset.target === "layer") document.getElementById("current-layer").value = currentLayer
-		else switch (el.dataset.numtype) {
+		else switch (el.dataset.target) {
+			case "layer":
+				document.getElementById("current-layer").value = currentLayer
+				break
+			case "percent":
+				el.value = parseFloat(currentPath.el.getAttribute(el.id)) * 100 || el.defaultValue
+				break
 			case "rgb":
 				el.value = currentPath.el.getAttribute(el.id)?.substring(1) || el.defaultValue
 				break
 			case "width":
 				el.value = currentPath.el.getAttribute(el.id) || el.defaultValue
-				break
-			case "opacity":
-				el.value = parseFloat(currentPath.el.getAttribute(el.id)) * 100 || el.defaultValue
 		}
 	}
 
@@ -619,30 +621,40 @@ for (const label of document.getElementById("pathdata").children) {
 		render.img = null
 		draw()
 	})
-
-	else if (el.dataset.target === "layer") el.addEventListener(
-		"change",
-		_ => el.checkValidity() && setCurrentPath(parseInt(el.value))
-	)
-
-	else el.addEventListener("input", _ => {
-		if (!el.checkValidity()) return
-
-		if (el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
-		else switch (el.dataset.numtype) {
-			case "rgb":
-				currentPath.el.setAttribute(el.id, "#" + el.value)
-				break
-			case "width":
-				currentPath.el.setAttribute(el.id, parseInt(el.value))
+	else {
+		el.addEventListener("keydown", e => e.key === "Enter" && el.blur())
+		switch (el.dataset.target) {
+			case "layer":
+				el.addEventListener("change", _ => el.checkValidity() && setCurrentPath(parseInt(el.value)))
 				break
 			case "percent":
-				currentPath.el.setAttribute(el.id, parseInt(el.value) / 100)
+				el.addEventListener("input", _ => {
+					if (!el.checkValidity()) return
+					if (el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
+					else currentPath.el.setAttribute(el.id, parseInt(el.value) / 100)
+					render.img = null
+					draw()
+				})
+				break
+			case "rgb":
+				el.addEventListener("input", _ => {
+					if (!el.checkValidity()) return
+					if (el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
+					else currentPath.el.setAttribute(el.id, "#" + el.value)
+					render.img = null
+					draw()
+				})
+				break
+			case "width":
+				el.addEventListener("input", _ => {
+					if (!el.checkValidity()) return
+					if (el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
+					else currentPath.el.setAttribute(el.id, parseInt(el.value))
+					render.img = null
+					draw()
+				})
 		}
-
-		render.img = null
-		draw()
-	})
+	}
 }
 
 render.svg.setAttribute("xmlns", "http://www.w3.org/2000/svg")
