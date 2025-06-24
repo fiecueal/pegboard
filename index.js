@@ -31,7 +31,6 @@ const
 		_gap: 15, //MAYBE infinite zoom... somehow
 		set gap(n) { this._gap = Math.min(Math.max(n, 10), 20) },
 		get gap() { return this._gap },
-		visible: true,
 		/**
 		 * cached as image; everything gets rerendered on mousemove
 		 * so use a cached image for grid unless resizing the canvas
@@ -45,7 +44,9 @@ const
 		/** @type {?HTMLImageElement} cached as image; same reason as `grid.img` */
 		img: null,
 		/** dimensions in pixels for rendering img */
-		imgSize: null
+		imgSize: null,
+		/** show/hide dots to preview what the downloaded svg looks like */
+		preview: false
 	},
 	cursor = { x: 0, y: 0 },
 	/** svg path elements and data associated with them */
@@ -66,6 +67,7 @@ const
 	 * [0] = base
 	 * [1] = shift
 	 */
+	guiHidden = { all: false, keyboard: false, pathdata: false, tutorial: false },
 	keybinds = [
 		{
 			q: "raise_stroke_width",
@@ -90,13 +92,13 @@ const
 			// a: "json",
 			t: "raise_layer",
 			s: "save_as_svg",
-			g: "lower_layer"
+			g: "lower_layer",
 			// d: "png",
 			// f: "webp",
 			// z: "undo",
 			// x: "redo",
 			// c: "crop",
-			// v: "preview"
+			v: "toggle_preview",
 		}
 	],
 	/** fns that map to `keybinds` values */
@@ -125,8 +127,8 @@ const
 		//TODO handle skipping empty layers
 		raise_layer: _ => setCurrentPath(currentLayer + 1),
 		lower_layer: _ => setCurrentPath(currentLayer - 1),
-	},
-	guiHidden = { all: false, keyboard: false, pathdata: false, tutorial: false }
+		toggle_preview: _ => { render.preview = !render.preview; draw() }
+	}
 
 let
 	clickdown,
@@ -154,7 +156,7 @@ function toggleGUI(id) {
 }
 
 function drawGrid() {
-	if (!grid.visible) return
+	if (render.preview) return
 	if (grid.img) return ctx.drawImage(grid.img, 0, 0)
 
 	ctx.beginPath()
@@ -215,6 +217,7 @@ function drawPreviewPoints() {
 }
 
 function drawPlacedPoints() {
+	if (render.preview) return
 	for (const segment of currentPath.d) {
 		for (const point of segment) {
 			const x = point.x * grid.gap + grid.offsetX
