@@ -93,6 +93,7 @@ const
 			t: "raise_layer",
 			s: "save_as_svg",
 			g: "lower_layer",
+			c: "clear_layer",
 			// d: "png",
 			// f: "webp",
 			// z: "undo",
@@ -127,6 +128,12 @@ const
 		//TODO handle skipping empty layers
 		raise_layer: _ => setCurrentPath(currentLayer + 1),
 		lower_layer: _ => setCurrentPath(currentLayer - 1),
+		clear_layer: _ => {
+			currentPath.d.length = 0
+			currentPath.el.removeAttribute("d")
+			render.img = null
+			draw()
+		},
 		toggle_preview: _ => { render.preview = !render.preview; draw() }
 	}
 
