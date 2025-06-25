@@ -252,6 +252,20 @@ function drawCursor() {
 	ctx.strokeStyle = "#fff"
 	ctx.lineWidth = 2
 	ctx.stroke()
+
+	if (!(clickdown?.points && clickdown.b === 0)) return
+
+	ctx.beginPath()
+	ctx.moveTo(0, y)
+	ctx.lineTo(canvas.width, y)
+	ctx.moveTo(x, 0)
+	ctx.lineTo(x, canvas.height)
+	ctx.moveTo(clickdown.x * grid.gap + grid.offsetX, clickdown.y * grid.gap + grid.offsetY)
+	ctx.lineTo(x, y)
+	ctx.strokeStyle = "grey"
+	ctx.setLineDash([4, 2])
+	ctx.lineWidth = 2
+	ctx.stroke()
 }
 
 function draw() {
