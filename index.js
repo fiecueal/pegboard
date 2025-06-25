@@ -2,7 +2,7 @@
 const
 	/** @type HTMLCanvasElement */
 	canvas = document.getElementById("canvas"),
-	ctx = canvas.getContext("2d", { desynchronized: true }), // test
+	ctx = canvas.getContext("2d", {desynchronized: true}), // test
 	/** misc app properties */
 	state = { //later
 		/** pixel offset of canvas from topleft */
@@ -16,7 +16,7 @@ const
 		held: false,
 		/** toggled via gui keyboard */
 		toggled: false,
-		get down() { return this.held || this.toggled }
+		get down() {return this.held || this.toggled}
 	},
 	grid = {
 		x: 0, y: 0,
@@ -29,8 +29,8 @@ const
 		/** `grid.offsetX` Y axis edition */
 		offsetY: 0,
 		_gap: 15, //MAYBE infinite zoom... somehow
-		set gap(n) { this._gap = Math.min(Math.max(n, 10), 20) },
-		get gap() { return this._gap },
+		set gap(n) {this._gap = Math.min(Math.max(n, 10), 20)},
+		get gap() {return this._gap},
 		/**
 		 * cached as image; everything gets rerendered on mousemove
 		 * so use a cached image for grid unless resizing the canvas
@@ -48,7 +48,7 @@ const
 		/** show/hide dots to preview what the downloaded svg looks like */
 		preview: false
 	},
-	cursor = { x: 0, y: 0 },
+	cursor = {x: 0, y: 0},
 	/** svg path elements and data associated with them */
 	paths = [
 		{
@@ -67,7 +67,7 @@ const
 	 * [0] = base
 	 * [1] = shift
 	 */
-	guiHidden = { all: false, keyboard: false, pathdata: false, tutorial: false },
+	guiHidden = {all: false, keyboard: false, pathdata: false, tutorial: false},
 	keybinds = [
 		{
 			q: "raise_stroke_width",
@@ -134,7 +134,7 @@ const
 			render.img = null
 			draw()
 		},
-		toggle_preview: _ => { render.preview = !render.preview; draw() }
+		toggle_preview: _ => {render.preview = !render.preview; draw()}
 	}
 
 let
@@ -144,32 +144,32 @@ let
 	currentPath = paths[0]
 
 function toggleGUI(id) {
-	if (id === "all") {
+	if(id === "all") {
 		const fn = guiHidden.all ? "remove" : "add"
-		for (const el of document.getElementById("gui").children) {
+		for(const el of document.getElementById("gui").children) {
 			el.classList[fn]("hide")
 		}
 
 		const flip = !guiHidden.all
-		for (const key in guiHidden) {
+		for(const key in guiHidden) {
 			guiHidden[key] = flip
 		}
 		return
 	}
-	if (guiHidden[id]) document.getElementById(id).classList.remove("hide")
+	if(guiHidden[id]) document.getElementById(id).classList.remove("hide")
 	else document.getElementById(id).classList.add("hide")
 
 	guiHidden[id] = !guiHidden[id]
 }
 
 function drawGrid() {
-	if (render.preview) return
-	if (grid.img) return ctx.drawImage(grid.img, 0, 0)
+	if(render.preview) return
+	if(grid.img) return ctx.drawImage(grid.img, 0, 0)
 
 	ctx.beginPath()
 	const bigR = grid.gap * 4
-	for (let x = grid.offsetX; x < canvas.width; x += grid.gap) {
-		for (let y = grid.offsetY; y < canvas.height; y += grid.gap) {
+	for(let x = grid.offsetX;x < canvas.width;x += grid.gap) {
+		for(let y = grid.offsetY;y < canvas.height;y += grid.gap) {
 			const r = x % bigR === grid.offsetX && y % bigR === grid.offsetY ? 2 : 1
 			ctx.moveTo(x, y)
 			ctx.arc(x, y, r, 0, 2 * Math.PI)
@@ -187,22 +187,22 @@ function drawGrid() {
 }
 
 function drawRender() {
-	if (render.img) return ctx.drawImage(
+	if(render.img) return ctx.drawImage(
 		render.img,
 		grid.offsetX,
 		grid.offsetY,
 		render.imgSize.w,
 		render.imgSize.h
 	)
-	if (paths.every(p => p.d.length === 0)) return //TODO better skip handler when no lines to draw
+	if(paths.every(p => p.d.length === 0)) return //TODO better skip handler when no lines to draw
 
 	//TODO turn svg to img but with size of canvas to avoid blurring (and replace render.imgSize)
 	const s = new XMLSerializer().serializeToString(render.svg)
-	const src = URL.createObjectURL(new Blob([s], { type: "image/svg+xml" }))
+	const src = URL.createObjectURL(new Blob([s], {type: "image/svg+xml"}))
 	// const src = `data:image/svg+xml;base64,${btoa(s)}` // Dotgrid's method
 	// const src = `data:image/svg+xml,${encodeURIComponent(s)}`
 
-	render.imgSize = { w: canvas.width - grid.offsetX * 2, h: canvas.height - grid.offsetY * 2 }
+	render.imgSize = {w: canvas.width - grid.offsetX * 2, h: canvas.height - grid.offsetY * 2}
 	render.img = new Image()
 	render.img.onload = _ => {
 		URL.revokeObjectURL(src)//revoke later to prevent img stutter
@@ -213,7 +213,7 @@ function drawRender() {
 
 function drawPreviewPoints() {
 	ctx.beginPath()
-	for (const point of points) {
+	for(const point of points) {
 		const x = point[0] * grid.gap + grid.offsetX
 		const y = point[1] * grid.gap + grid.offsetY
 		ctx.moveTo(x, y)
@@ -224,9 +224,9 @@ function drawPreviewPoints() {
 }
 
 function drawPlacedPoints() {
-	if (render.preview) return
-	for (const segment of currentPath.d) {
-		for (const point of segment) {
+	if(render.preview) return
+	for(const segment of currentPath.d) {
+		for(const point of segment) {
 			const x = point.x * grid.gap + grid.offsetX
 			const y = point.y * grid.gap + grid.offsetY
 			ctx.beginPath()
@@ -253,7 +253,7 @@ function drawCursor() {
 	ctx.lineWidth = 2
 	ctx.stroke()
 
-	if (!(clickdown?.points && clickdown.b === 0)) return
+	if(!(clickdown?.points && clickdown.b === 0)) return
 
 	ctx.beginPath()
 	ctx.moveTo(0, y)
@@ -279,9 +279,9 @@ function draw() {
 
 function stringifySegment(segment) {
 	let d = ""
-	for (let i = 0; i < segment.length; i++) {
+	for(let i = 0;i < segment.length;i++) {
 		let point = segment[i]
-		switch (point.type) {
+		switch(point.type) {
 			case "M":
 			case "L0":
 			case "Q1":
@@ -305,16 +305,16 @@ function stringifySegment(segment) {
 
 	const first = segment[0]
 	const last = segment[segment.length - 1]
-	if (first.x === last.x && first.y === last.y) d += "Z"
+	if(first.x === last.x && first.y === last.y) d += "Z"
 
 	return d
 }
 
 /** count = control points + end point for beziers */
 function addSegment(type, count = 1) {
-	const segment = [{ x: points[0][0], y: points[0][1], type: "M" }]
-	for (let i = 1; i < points.length; i++) {
-		segment.push({ x: points[i][0], y: points[i][1], type: `${type}${i % count}` })
+	const segment = [{x: points[0][0], y: points[0][1], type: "M"}]
+	for(let i = 1;i < points.length;i++) {
+		segment.push({x: points[i][0], y: points[i][1], type: `${type}${i % count}`})
 	}
 	currentPath.d.push(segment)
 
@@ -334,10 +334,10 @@ function buildSVG() {
 	//TODO insert paths at correct index instead of clearing each build
 	render.svg.innerHTML = ""
 
-	for (const path of paths) {
+	for(const path of paths) {
 		render.svg.appendChild(path.el)
 		let d = ""
-		for (const segment of path.d) {
+		for(const segment of path.d) {
 			d += stringifySegment(segment)
 		}
 		path.el.setAttribute("d", d)
@@ -348,7 +348,7 @@ function cycleAttrOpts(attr, opts) {
 	const prev = currentPath.el.getAttribute(attr) || opts[0]
 	const next = opts[(opts.indexOf(prev) + 1) % opts.length]
 
-	if (next === opts[0]) currentPath.el.removeAttribute(attr)
+	if(next === opts[0]) currentPath.el.removeAttribute(attr)
 	else currentPath.el.setAttribute(attr, next)
 
 	document.getElementById(attr).value = next
@@ -361,12 +361,12 @@ function updateWidth(n) {
 	const prev = parseInt(currentPath.el.getAttribute("stroke-width")) || 1
 	const next = Math.max(prev + n, 1)
 
-	if (next > 1) currentPath.el.setAttribute("stroke-width", next)
+	if(next > 1) currentPath.el.setAttribute("stroke-width", next)
 	else currentPath.el.removeAttribute("stroke-width")
 
 	document.getElementById("stroke-width").value = next
 
-	if (next !== prev) {
+	if(next !== prev) {
 		render.img = null
 		draw()
 	}
@@ -375,15 +375,15 @@ function updateWidth(n) {
 function updateOpacity(attr, n) {
 	let prev = parseFloat(currentPath.el.getAttribute(attr)) * 100
 	// js bruh moment: 0 is falsy
-	if (prev !== 0) prev ||= 100
+	if(prev !== 0) prev ||= 100
 	const next = Math.min(Math.max(prev + n, 0), 100)
 
-	if (next < 100) currentPath.el.setAttribute(attr, next / 100)
+	if(next < 100) currentPath.el.setAttribute(attr, next / 100)
 	else currentPath.el.removeAttribute(attr)
 
 	document.getElementById(attr).value = next
 
-	if (next !== prev) {
+	if(next !== prev) {
 		render.img = null
 		draw()
 	}
@@ -395,7 +395,7 @@ function saveAs(type) {
 	const s = new XMLSerializer().serializeToString(render.svg)
 	const a = document.createElement("a")
 	a.download = `pegboard-${new Date().getTime()}`
-	a.href = URL.createObjectURL(new Blob([s], { type }))
+	a.href = URL.createObjectURL(new Blob([s], {type}))
 	a.click()
 	URL.revokeObjectURL(a.href)
 	// export to webp/png
@@ -411,17 +411,17 @@ function saveAs(type) {
 /** @param {number} d should already be an int */
 function setCurrentPath(d) {
 	const l = Math.min(Math.max(d, 0), paths.length)
-	if (l === currentLayer) return
+	if(l === currentLayer) return
 
 	currentLayer = l
 
-	paths[currentLayer] ||= { el: document.createElementNS("http://www.w3.org/2000/svg", "path"), d: [] }
+	paths[currentLayer] ||= {el: document.createElementNS("http://www.w3.org/2000/svg", "path"), d: []}
 	currentPath = paths[currentLayer]
 	render.svg.appendChild(currentPath.el) //TODO insert at correct index
 
-	for (const el of document.querySelectorAll("input, select")) {
-		if (el.tagName === "SELECT") el.value = currentPath.el.getAttribute(el.id) || el.options[0].label
-		else switch (el.dataset.target) {
+	for(const el of document.querySelectorAll("input, select")) {
+		if(el.tagName === "SELECT") el.value = currentPath.el.getAttribute(el.id) || el.options[0].label
+		else switch(el.dataset.target) {
 			case "layer":
 				document.getElementById("current-layer").value = currentLayer
 				break
@@ -440,9 +440,9 @@ function setCurrentPath(d) {
 }
 
 function setKeybindLayer(l) {
-	for (const k of "qwertasdfgzxcvb") {
+	for(const k of "qwertasdfgzxcvb") {
 		const b = document.getElementById(k)
-		if (keybinds[l][k]) {
+		if(keybinds[l][k]) {
 			b.nextElementSibling.textContent = keybinds[l][k]
 			b.disabled = false
 		} else {
@@ -453,9 +453,9 @@ function setKeybindLayer(l) {
 }
 
 function keydown(e) {
-	if (e.repeat) return
-	if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "SELECT")
-		switch (e.key) {
+	if(e.repeat) return
+	if(document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "SELECT")
+		switch(e.key) {
 			case "Enter":
 			case "Escape":
 				document.activeElement.blur()
@@ -464,15 +464,15 @@ function keydown(e) {
 				e.preventDefault()
 				const cyclegroup = [...document.querySelectorAll("input, select")]
 				let next = (cyclegroup.indexOf(document.activeElement) + (e.shiftKey ? -1 : 1)) % cyclegroup.length
-				if (next < 0) next = cyclegroup.length - 1
+				if(next < 0) next = cyclegroup.length - 1
 				cyclegroup[next].focus()
 		}
-	else switch (e.key) {
+	else switch(e.key) {
 		case "Shift":
-			if (e.gui) {
-				if (shift.held) return
+			if(e.gui) {
+				if(shift.held) return
 
-				if (shift.toggled) {
+				if(shift.toggled) {
 					shift.b.classList.remove("active")
 					setKeybindLayer(0)
 				} else {
@@ -496,13 +496,13 @@ function keydown(e) {
 			break
 		default:
 			const f = keybinds[shift.down ? 1 : 0][e.key.toLowerCase()]
-			if (f) commands[f]()
+			if(f) commands[f]()
 	}
 }
 
 function keyup(e) {
-	if (e.key !== "Shift") return
-	if (e.target?.tagName === "INPUT") return
+	if(e.key !== "Shift") return
+	if(e.target?.tagName === "INPUT") return
 	shift.held = shift.toggled = false
 	shift.b.classList.remove("active")
 	setKeybindLayer(0)
@@ -535,7 +535,7 @@ function mousemove(e) {
 	const x = Math.trunc((e.clientX + grid.gap / 2 - grid.offsetX) / grid.gap)
 	const y = Math.trunc((e.clientY + grid.gap / 2 - grid.offsetY) / grid.gap)
 
-	if (cursor.x !== x || cursor.y !== y) {
+	if(cursor.x !== x || cursor.y !== y) {
 		cursor.x = x
 		cursor.y = y
 		draw()
@@ -543,12 +543,12 @@ function mousemove(e) {
 }
 
 function mousedown(e) {
-	if (clickdown) return
-	clickdown = { x: cursor.x, y: cursor.y, b: e.button }
+	if(clickdown) return
+	clickdown = {x: cursor.x, y: cursor.y, b: e.button}
 
-	for (const segment of currentPath.d) {
-		for (const point of segment) {
-			if (point.x === cursor.x && point.y === cursor.y) {
+	for(const segment of currentPath.d) {
+		for(const point of segment) {
+			if(point.x === cursor.x && point.y === cursor.y) {
 				clickdown.points ||= []
 				clickdown.points.push(point)
 			}
@@ -557,13 +557,13 @@ function mousedown(e) {
 }
 
 function mouseup(e) {
-	if (!clickdown) return
-	if (clickdown.b !== e.button) return
-	clickup = { x: cursor.x, y: cursor.y, b: e.button } //MAYBE delete clickup (redundant)
+	if(!clickdown) return
+	if(clickdown.b !== e.button) return
+	clickup = {x: cursor.x, y: cursor.y, b: e.button} //MAYBE delete clickup (redundant)
 
-	switch (e.button) {
+	switch(e.button) {
 		case 0:
-			if (clickup.x === clickdown.x && clickup.y === clickdown.y || !clickdown.points) {
+			if(clickup.x === clickdown.x && clickup.y === clickdown.y || !clickdown.points) {
 				points.push([cursor.x, cursor.y])
 				ctx.beginPath()
 				const x = cursor.x * grid.gap + grid.offsetX
@@ -574,7 +574,7 @@ function mouseup(e) {
 				break
 			}
 
-			for (const point of clickdown.points) {
+			for(const point of clickdown.points) {
 				point.x = clickup.x
 				point.y = clickup.y
 			}
@@ -583,19 +583,19 @@ function mouseup(e) {
 			draw()
 			break
 		case 2: //TODO not broken but it looks atrocious
-			if (!clickdown.points) break
+			if(!clickdown.points) break
 
 			let p
-			while (p = clickdown.points.pop()) {
-				for (const segment of currentPath.d) {
-					if (!segment.includes(p)) continue
+			while(p = clickdown.points.pop()) {
+				for(const segment of currentPath.d) {
+					if(!segment.includes(p)) continue
 
 					const i = segment.indexOf(p)
-					switch (p.type) {
+					switch(p.type) {
 						case "M":
-							if (!segment[1]) break
-							if (segment[1].type === "Q1") segment[2].type = "A0"
-							else if (segment[1].type === "C1") {
+							if(!segment[1]) break
+							if(segment[1].type === "Q1") segment[2].type = "A0"
+							else if(segment[1].type === "C1") {
 								segment[2].type = "Q1"
 								segment[3].type = "Q0"
 							}
@@ -620,7 +620,7 @@ function mouseup(e) {
 							segment[i - 1].type = "Q0"
 					}
 					segment.splice(i, 1)
-					if (segment.length === 0) currentPath.d.splice(currentPath.d.indexOf(segment), 1)
+					if(segment.length === 0) currentPath.d.splice(currentPath.d.indexOf(segment), 1)
 					break
 				}
 			}
@@ -644,22 +644,22 @@ canvas.addEventListener("mousedown", mousedown)
 canvas.addEventListener("mouseup", mouseup)
 canvas.addEventListener("contextmenu", e => e.preventDefault())
 
-for (const el of document.querySelectorAll("input, select")) {
-	if (el.tagName === "SELECT") el.addEventListener("change", _ => {
-		if (el.selectedOptions[0].defaultSelected) currentPath.el.removeAttribute(el.id)
+for(const el of document.querySelectorAll("input, select")) {
+	if(el.tagName === "SELECT") el.addEventListener("change", _ => {
+		if(el.selectedOptions[0].defaultSelected) currentPath.el.removeAttribute(el.id)
 		else currentPath.el.setAttribute(el.id, el.value)
 
 		render.img = null
 		draw()
 	})
-	else switch (el.dataset.target) {
+	else switch(el.dataset.target) {
 		case "layer":
 			el.addEventListener("change", _ => el.checkValidity() && setCurrentPath(parseInt(el.value)))
 			break
 		case "percent":
 			el.addEventListener("input", _ => {
-				if (!el.checkValidity()) return
-				if (el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
+				if(!el.checkValidity()) return
+				if(el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
 				else currentPath.el.setAttribute(el.id, parseInt(el.value) / 100)
 				render.img = null
 				draw()
@@ -667,8 +667,8 @@ for (const el of document.querySelectorAll("input, select")) {
 			break
 		case "rgb":
 			el.addEventListener("input", _ => {
-				if (!el.checkValidity()) return
-				if (el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
+				if(!el.checkValidity()) return
+				if(el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
 				else currentPath.el.setAttribute(el.id, "#" + el.value)
 				render.img = null
 				draw()
@@ -676,8 +676,8 @@ for (const el of document.querySelectorAll("input, select")) {
 			break
 		case "width":
 			el.addEventListener("input", _ => {
-				if (!el.checkValidity()) return
-				if (el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
+				if(!el.checkValidity()) return
+				if(el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
 				else currentPath.el.setAttribute(el.id, parseInt(el.value))
 				render.img = null
 				draw()
