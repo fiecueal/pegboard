@@ -405,10 +405,7 @@ function setCurrentPath(d) {
 	currentPath = paths[currentLayer]
 	render.svg.appendChild(currentPath.el) //TODO insert at correct index
 
-	for (const label of document.getElementById("pathdata").children) {
-		if (label.tagName !== "LABEL") continue
-
-		const el = document.getElementById(label.htmlFor)
+	for (const el of document.querySelectorAll("input, select")) {
 		if (el.tagName === "SELECT") el.value = currentPath.el.getAttribute(el.id) || el.options[0].label
 		else switch (el.dataset.target) {
 			case "layer":
@@ -619,11 +616,7 @@ canvas.addEventListener("mousedown", mousedown)
 canvas.addEventListener("mouseup", mouseup)
 canvas.addEventListener("contextmenu", e => e.preventDefault())
 
-for (const label of document.getElementById("pathdata").children) {
-	if (label.tagName !== "LABEL") continue
-
-	const el = document.getElementById(label.htmlFor)
-
+for (const el of document.querySelectorAll("input, select")) {
 	if (el.tagName === "SELECT") el.addEventListener("change", _ => {
 		if (el.selectedOptions[0].defaultSelected) currentPath.el.removeAttribute(el.id)
 		else currentPath.el.setAttribute(el.id, el.value)
