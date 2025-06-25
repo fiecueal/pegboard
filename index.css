@@ -131,9 +131,12 @@ select,
 #rgb-input {
 	min-width: 9ch;
 	padding-left: 2px;
-	border: none;
+	border: 1px grey solid;
 	border-radius: 2px;
-	outline: 1px grey solid
+
+	&:focus {
+		outline: 2px #789 solid;
+	}
 }
 
 #rgb-input {
@@ -145,8 +148,13 @@ select,
 	}
 
 	input {
-		outline: none;
+		border: none;
+		outline: none !important;
 		flex: 1
+	}
+
+	&:has(input:focus) {
+		outline: 2px #789 solid;
 	}
 }
 

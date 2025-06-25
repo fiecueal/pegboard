@@ -440,7 +440,22 @@ function setKeybindLayer(l) {
 
 function keydown(e) {
 	if (e.repeat) return
-	if (e.target?.tagName === "INPUT") return
+	if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "SELECT") {
+		switch (e.key) {
+			case "Enter":
+			case "Escape":
+				document.activeElement.blur()
+				break
+			case "Tab":
+				e.preventDefault()
+				const cyclegroup = [...document.querySelectorAll("input, select")]
+				let next = (cyclegroup.indexOf(document.activeElement) + (e.shiftKey ? -1 : 1)) % cyclegroup.length
+				if (next < 0) next = cyclegroup.length - 1
+				cyclegroup[next].focus()
+		}
+		return
+	}
+
 	const k = e.key.toLowerCase()
 
 	switch (k) {
@@ -624,39 +639,36 @@ for (const el of document.querySelectorAll("input, select")) {
 		render.img = null
 		draw()
 	})
-	else {
-		el.addEventListener("keydown", e => e.key === "Enter" && el.blur())
-		switch (el.dataset.target) {
-			case "layer":
-				el.addEventListener("change", _ => el.checkValidity() && setCurrentPath(parseInt(el.value)))
-				break
-			case "percent":
-				el.addEventListener("input", _ => {
-					if (!el.checkValidity()) return
-					if (el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
-					else currentPath.el.setAttribute(el.id, parseInt(el.value) / 100)
-					render.img = null
-					draw()
-				})
-				break
-			case "rgb":
-				el.addEventListener("input", _ => {
-					if (!el.checkValidity()) return
-					if (el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
-					else currentPath.el.setAttribute(el.id, "#" + el.value)
-					render.img = null
-					draw()
-				})
-				break
-			case "width":
-				el.addEventListener("input", _ => {
-					if (!el.checkValidity()) return
-					if (el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
-					else currentPath.el.setAttribute(el.id, parseInt(el.value))
-					render.img = null
-					draw()
-				})
-		}
+	else switch (el.dataset.target) {
+		case "layer":
+			el.addEventListener("change", _ => el.checkValidity() && setCurrentPath(parseInt(el.value)))
+			break
+		case "percent":
+			el.addEventListener("input", _ => {
+				if (!el.checkValidity()) return
+				if (el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
+				else currentPath.el.setAttribute(el.id, parseInt(el.value) / 100)
+				render.img = null
+				draw()
+			})
+			break
+		case "rgb":
+			el.addEventListener("input", _ => {
+				if (!el.checkValidity()) return
+				if (el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
+				else currentPath.el.setAttribute(el.id, "#" + el.value)
+				render.img = null
+				draw()
+			})
+			break
+		case "width":
+			el.addEventListener("input", _ => {
+				if (!el.checkValidity()) return
+				if (el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
+				else currentPath.el.setAttribute(el.id, parseInt(el.value))
+				render.img = null
+				draw()
+			})
 	}
 }
 
