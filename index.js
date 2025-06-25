@@ -490,6 +490,10 @@ function keydown(e) {
 			points.length = 0
 			draw()
 			break
+		case "Tab":
+			e.preventDefault()
+			document.querySelector("input, select").focus()
+			break
 		default:
 			const f = keybinds[shift.down ? 1 : 0][e.key.toLowerCase()]
 			if (f) commands[f]()
