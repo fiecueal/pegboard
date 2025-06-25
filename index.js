@@ -440,7 +440,7 @@ function setKeybindLayer(l) {
 
 function keydown(e) {
 	if (e.repeat) return
-	if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "SELECT") {
+	if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "SELECT")
 		switch (e.key) {
 			case "Enter":
 			case "Escape":
@@ -453,13 +453,8 @@ function keydown(e) {
 				if (next < 0) next = cyclegroup.length - 1
 				cyclegroup[next].focus()
 		}
-		return
-	}
-
-	const k = e.key.toLowerCase()
-
-	switch (k) {
-		case "shift":
+	else switch (e.key) {
+		case "Shift":
 			if (e.gui) {
 				if (shift.held) return
 
@@ -477,12 +472,12 @@ function keydown(e) {
 				setKeybindLayer(1)
 			}
 			break
-		case "escape":
+		case "Escape":
 			points.length = 0
 			draw()
 			break
 		default:
-			const f = keybinds[shift.down ? 1 : 0][k]
+			const f = keybinds[shift.down ? 1 : 0][e.key.toLowerCase()]
 			if (f) commands[f]()
 	}
 }
