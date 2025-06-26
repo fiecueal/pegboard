@@ -131,8 +131,7 @@ const
 		clear_layer: _ => {
 			currentPath.d.length = 0
 			currentPath.el.removeAttribute("d")
-			render.img = null
-			draw()
+			draw({render: true})
 		},
 		toggle_preview: _ => {render.preview = !render.preview; draw()}
 	}
@@ -162,9 +161,9 @@ function toggleGUI(id) {
 	guiHidden[id] = !guiHidden[id]
 }
 
-function drawGrid() {
+function drawGrid(redraw) {
 	if(render.preview) return
-	if(grid.img) return ctx.drawImage(grid.img, 0, 0)
+	if(grid.img && !redraw) return ctx.drawImage(grid.img, 0, 0)
 
 	ctx.beginPath()
 	const bigR = grid.gap * 4
@@ -186,14 +185,11 @@ function drawGrid() {
 	})
 }
 
-function drawRender() {
-	if(render.img) return ctx.drawImage(
-		render.img,
-		grid.offsetX,
-		grid.offsetY,
-		render.imgSize.w,
-		render.imgSize.h
-	)
+function drawRender(redraw) {
+	if(render.img) {
+		ctx.drawImage(render.img, grid.offsetX, grid.offsetY, render.imgSize.w, render.imgSize.h)
+		if(!redraw) return
+	}
 	if(paths.every(p => p.d.length === 0)) return //TODO better skip handler when no lines to draw
 
 	//TODO turn svg to img but with size of canvas to avoid blurring (and replace render.imgSize)
@@ -205,7 +201,7 @@ function drawRender() {
 	render.imgSize = {w: canvas.width - grid.offsetX * 2, h: canvas.height - grid.offsetY * 2}
 	render.img = new Image()
 	render.img.onload = _ => {
-		URL.revokeObjectURL(src)//revoke later to prevent img stutter
+		URL.revokeObjectURL(src)
 		draw()
 	}
 	render.img.src = src
@@ -268,10 +264,10 @@ function drawCursor() {
 	ctx.stroke()
 }
 
-function draw() {
+function draw(redraw = {}) {
 	canvas.width = canvas.width
-	drawGrid()
-	drawRender()
+	drawGrid(redraw.grid)
+	drawRender(redraw.render)
 	drawPreviewPoints()
 	drawPlacedPoints()
 	drawCursor()
@@ -323,8 +319,7 @@ function addSegment(type, count = 1) {
 		"d",
 		(currentPath.el.getAttribute("d") || "") + stringifySegment(segment)
 	)
-	render.img = null
-	draw()
+	draw({render: true})
 }
 
 //TODO don't build after every action; just add new points as needed; goal: only call before exporting
@@ -353,8 +348,7 @@ function cycleAttrOpts(attr, opts) {
 
 	document.getElementById(attr).value = next
 
-	render.img = null
-	draw()
+	draw({render: true})
 }
 
 function updateWidth(n) {
@@ -366,10 +360,7 @@ function updateWidth(n) {
 
 	document.getElementById("stroke-width").value = next
 
-	if(next !== prev) {
-		render.img = null
-		draw()
-	}
+	if(next !== prev) draw({render: true})
 }
 
 function updateOpacity(attr, n) {
@@ -383,10 +374,7 @@ function updateOpacity(attr, n) {
 
 	document.getElementById(attr).value = next
 
-	if(next !== prev) {
-		render.img = null
-		draw()
-	}
+	if(next !== prev) draw({render: true})
 }
 
 /** assumes render.(svg|img) is built before reaching this method */
@@ -518,17 +506,19 @@ function resize() {
 	grid.offsetX = Math.trunc(canvas.width % grid.gap / 2)
 	grid.offsetY = Math.trunc(canvas.height % grid.gap / 2)
 	buildSVG()  //TODO change ctx.drawImage() dimension args instead
-	grid.img = null
-	draw()
+	draw({grid: true})
 }
 
 function wheel(e) {
 	grid.gap += e.deltaY < 0 ? 1 : -1
 
-	//TODO this is inefficient
-	render.img = null
-	buildSVG()
-	resize()
+	//TODO set svg w|h on img creation instead of viewbox magic
+	grid.x = Math.trunc(canvas.width / grid.gap)
+	grid.y = Math.trunc(canvas.height / grid.gap)
+	grid.offsetX = Math.trunc(canvas.width % grid.gap / 2)
+	grid.offsetY = Math.trunc(canvas.height % grid.gap / 2)
+	render.svg.setAttribute("viewBox", `0 0 ${grid.x} ${grid.y}`)
+	draw({grid: true, render: true})
 }
 
 function mousemove(e) {
@@ -579,8 +569,7 @@ function mouseup(e) {
 				point.y = clickup.y
 			}
 			buildSVG()
-			render.img = null
-			draw()
+			draw({render: true})
 			break
 		case 2: //TODO not broken but it looks atrocious
 			if(!clickdown.points) break
@@ -626,8 +615,7 @@ function mouseup(e) {
 			}
 
 			buildSVG()
-			render.img = null
-			draw()
+			draw({render: true})
 			break
 	}
 
@@ -649,8 +637,7 @@ for(const el of document.querySelectorAll("input, select")) {
 		if(el.selectedOptions[0].defaultSelected) currentPath.el.removeAttribute(el.id)
 		else currentPath.el.setAttribute(el.id, el.value)
 
-		render.img = null
-		draw()
+		draw({render: true})
 	})
 	else switch(el.dataset.target) {
 		case "layer":
@@ -661,8 +648,7 @@ for(const el of document.querySelectorAll("input, select")) {
 				if(!el.checkValidity()) return
 				if(el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
 				else currentPath.el.setAttribute(el.id, parseInt(el.value) / 100)
-				render.img = null
-				draw()
+				draw({render: true})
 			})
 			break
 		case "rgb":
@@ -670,8 +656,7 @@ for(const el of document.querySelectorAll("input, select")) {
 				if(!el.checkValidity()) return
 				if(el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
 				else currentPath.el.setAttribute(el.id, "#" + el.value)
-				render.img = null
-				draw()
+				draw({render: true})
 			})
 			break
 		case "width":
@@ -679,8 +664,7 @@ for(const el of document.querySelectorAll("input, select")) {
 				if(!el.checkValidity()) return
 				if(el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
 				else currentPath.el.setAttribute(el.id, parseInt(el.value))
-				render.img = null
-				draw()
+				draw({render: true})
 			})
 	}
 }

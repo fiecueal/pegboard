@@ -10,7 +10,6 @@ Todos:
 - fill props
 - functional GUI
 - save as png
-- remove that flicker thing on certain actions
 - undo/redo
 - dragging canvas
 - tutorial/instruction page
