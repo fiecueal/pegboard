@@ -198,6 +198,7 @@ function setCurrentPath(d) {
 				el.value = currentPath.el.getAttribute(el.id)?.substring(1) || el.defaultValue
 				break
 			case "number":
+			case "number-list":
 				el.value = currentPath.el.getAttribute(el.id) || el.defaultValue
 		}
 	}
@@ -663,6 +664,14 @@ for(const el of document.querySelectorAll("input, select")) {
 				if(!el.checkValidity()) return
 				if(el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
 				else currentPath.el.setAttribute(el.id, parseInt(el.value))
+				draw({render: true})
+			})
+			break
+		case "number-list":
+			el.addEventListener("input", _ => {
+				if(!el.checkValidity()) return
+				if(el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
+				else currentPath.el.setAttribute(el.id, el.value.trim().replaceAll(/\s+/g, " "))
 				draw({render: true})
 			})
 	}

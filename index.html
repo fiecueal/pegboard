@@ -97,6 +97,12 @@
         <input id="stroke" data-target="rgb" maxlength="6" pattern="([0-9a-fA-F]{3})*">
       </div>
 
+      <label for="stroke-dasharray">dash array</label>
+      <input id="stroke-dasharray" data-target="number-list" pattern="(\d*\s*)*">
+
+      <label for="stroke-dashoffset">dash offset</label>
+      <input id="stroke-dashoffset" type="number" data-target="number" value="0">
+
       <label for="stroke-linecap">linecap</label>
       <select id="stroke-linecap">
         <option selected>butt</option>
@@ -112,6 +118,9 @@
         <option>arcs</option>
         <option>bevel</option>
       </select>
+
+      <label for="stroke-miterlimit">miter limit</label>
+      <input id="stroke-miterlimit" type="number" data-target="number" value="4">
 
       <label for="stroke-opacity">opacity</label>
       <input id="stroke-opacity" type="number" data-target="percent" min="0" max="100"

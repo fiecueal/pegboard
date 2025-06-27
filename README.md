@@ -4,7 +4,6 @@ Giving [Dotgrid](https://100r.co/site/dotgrid.html) a touchup.
 
 Todos:
 - layer CRUD
-- stroke props (dashoffset, dasharray, miterlimit)
 - save as png
 - undo/redo
 - dragging canvas
