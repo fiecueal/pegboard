@@ -61,7 +61,7 @@ const
 			d: [] //TODO "Z" command toggle for every "M" segment
 		}
 	],
-	/** points before they get added to the path */
+	/** preview points before they get added to the path */
 	points = [],
 	/** keyboard keys tied to command names/tooltips
 	 * [0] = base
@@ -159,6 +159,50 @@ function toggleGUI(id) {
 	else document.getElementById(id).classList.add("hide")
 
 	guiHidden[id] = !guiHidden[id]
+}
+
+function setKeybindLayer(l) {
+	for(const k of "qwertasdfgzxcvb") {
+		const b = document.getElementById(k)
+		if(keybinds[l][k]) {
+			b.nextElementSibling.textContent = keybinds[l][k]
+			b.disabled = false
+		} else {
+			b.nextElementSibling.textContent = null
+			b.disabled = true
+		}
+	}
+}
+
+/** @param {number} d should already be an int */
+function setCurrentPath(d) {
+	const l = Math.min(Math.max(d, 0), paths.length)
+	if(l === currentLayer) return
+
+	currentLayer = l
+
+	paths[currentLayer] ||= {el: document.createElementNS("http://www.w3.org/2000/svg", "path"), d: []}
+	currentPath = paths[currentLayer]
+	render.svg.appendChild(currentPath.el) //TODO insert at correct index
+
+	for(const el of document.querySelectorAll("input, select")) {
+		if(el.tagName === "SELECT") el.value = currentPath.el.getAttribute(el.id) || el.options[0].label
+		else switch(el.dataset.target) {
+			case "layer":
+				el.value = currentLayer
+				break
+			case "percent":
+				el.value = parseFloat(currentPath.el.getAttribute(el.id)) * 100 || el.defaultValue
+				break
+			case "rgb":
+				el.value = currentPath.el.getAttribute(el.id)?.substring(1) || el.defaultValue
+				break
+			case "number":
+				el.value = currentPath.el.getAttribute(el.id) || el.defaultValue
+		}
+	}
+
+	draw()
 }
 
 function drawGrid(redraw) {
@@ -305,22 +349,6 @@ function stringifySegment(segment) {
 	return d
 }
 
-/** count = control points + end point for beziers */
-function addSegment(type, count = 1) {
-	const segment = [{x: points[0][0], y: points[0][1], type: "M"}]
-	for(let i = 1;i < points.length;i++) {
-		segment.push({x: points[i][0], y: points[i][1], type: `${type}${i % count}`})
-	}
-	currentPath.d.push(segment)
-
-	points.length = 0
-	currentPath.el.setAttribute(
-		"d",
-		(currentPath.el.getAttribute("d") || "") + stringifySegment(segment)
-	)
-	draw({render: true})
-}
-
 //TODO don't build after every action; just add new points as needed; goal: only call before exporting
 //TODO proper layer addition and removal
 function buildSVG() {
@@ -336,6 +364,41 @@ function buildSVG() {
 		}
 		path.el.setAttribute("d", d)
 	}
+}
+
+/** assumes render.(svg|img) is built before reaching this method */
+// currently only exports svg properly
+function saveAs(type) {
+	const s = new XMLSerializer().serializeToString(render.svg)
+	const a = document.createElement("a")
+	a.download = `pegboard-${new Date().getTime()}`
+	a.href = URL.createObjectURL(new Blob([s], {type}))
+	a.click()
+	URL.revokeObjectURL(a.href)
+	// export to webp/png
+	//TODO put render.img in canvas -> turn canvas into img -> dl img
+	// const c = document.createElement("canvas")
+	// const cc = c.getContext("2d")
+	// c.width = render.img.naturalWidth
+	// c.height = render.img.naturalHeight
+	// cc.drawImage(render.img, 0, 0)
+	// c.toBlob()
+}
+
+/** @param count - control points + end point for beziers */
+function addSegment(type, count = 1) {
+	const segment = [{x: points[0][0], y: points[0][1], type: "M"}]
+	for(let i = 1;i < points.length;i++) {
+		segment.push({x: points[i][0], y: points[i][1], type: `${type}${i % count}`})
+	}
+	currentPath.d.push(segment)
+
+	points.length = 0
+	currentPath.el.setAttribute(
+		"d",
+		(currentPath.el.getAttribute("d") || "") + stringifySegment(segment)
+	)
+	draw({render: true})
 }
 
 function cycleAttrOpts(attr, opts) {
@@ -374,69 +437,6 @@ function updateOpacity(attr, n) {
 	document.getElementById(attr).value = next
 
 	if(next !== prev) draw({render: true})
-}
-
-/** assumes render.(svg|img) is built before reaching this method */
-// currently only exports svg properly
-function saveAs(type) {
-	const s = new XMLSerializer().serializeToString(render.svg)
-	const a = document.createElement("a")
-	a.download = `pegboard-${new Date().getTime()}`
-	a.href = URL.createObjectURL(new Blob([s], {type}))
-	a.click()
-	URL.revokeObjectURL(a.href)
-	// export to webp/png
-	//TODO put render.img in canvas -> turn canvas into img -> dl img
-	// const c = document.createElement("canvas")
-	// const cc = c.getContext("2d")
-	// c.width = render.img.naturalWidth
-	// c.height = render.img.naturalHeight
-	// cc.drawImage(render.img, 0, 0)
-	// c.toBlob()
-}
-
-/** @param {number} d should already be an int */
-function setCurrentPath(d) {
-	const l = Math.min(Math.max(d, 0), paths.length)
-	if(l === currentLayer) return
-
-	currentLayer = l
-
-	paths[currentLayer] ||= {el: document.createElementNS("http://www.w3.org/2000/svg", "path"), d: []}
-	currentPath = paths[currentLayer]
-	render.svg.appendChild(currentPath.el) //TODO insert at correct index
-
-	for(const el of document.querySelectorAll("input, select")) {
-		if(el.tagName === "SELECT") el.value = currentPath.el.getAttribute(el.id) || el.options[0].label
-		else switch(el.dataset.target) {
-			case "layer":
-				document.getElementById("current-layer").value = currentLayer
-				break
-			case "percent":
-				el.value = parseFloat(currentPath.el.getAttribute(el.id)) * 100 || el.defaultValue
-				break
-			case "rgb":
-				el.value = currentPath.el.getAttribute(el.id)?.substring(1) || el.defaultValue
-				break
-			case "width":
-				el.value = currentPath.el.getAttribute(el.id) || el.defaultValue
-		}
-	}
-
-	draw()
-}
-
-function setKeybindLayer(l) {
-	for(const k of "qwertasdfgzxcvb") {
-		const b = document.getElementById(k)
-		if(keybinds[l][k]) {
-			b.nextElementSibling.textContent = keybinds[l][k]
-			b.disabled = false
-		} else {
-			b.nextElementSibling.textContent = null
-			b.disabled = true
-		}
-	}
 }
 
 function keydown(e) {
@@ -658,7 +658,7 @@ for(const el of document.querySelectorAll("input, select")) {
 				draw({render: true})
 			})
 			break
-		case "width":
+		case "number":
 			el.addEventListener("input", _ => {
 				if(!el.checkValidity()) return
 				if(el.value === el.defaultValue) currentPath.el.removeAttribute(el.id)
