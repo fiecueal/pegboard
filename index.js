@@ -190,7 +190,6 @@ function drawRender(redraw) {
 		ctx.drawImage(render.img, grid.offsetX, grid.offsetY, render.imgSize.w, render.imgSize.h)
 		if(!redraw) return
 	}
-	if(paths.every(p => p.d.length === 0)) return //TODO better skip handler when no lines to draw
 
 	//TODO turn svg to img but with size of canvas to avoid blurring (and replace render.imgSize)
 	const s = new XMLSerializer().serializeToString(render.svg)
