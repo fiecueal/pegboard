@@ -1,6 +1,6 @@
 * {
 	font-family: sans-serif;
-	line-height: 1.1;
+	line-height: 1.1
 }
 
 a,
@@ -18,7 +18,7 @@ dl {
 }
 
 label {
-	white-space: nowrap;
+	white-space: nowrap
 }
 
 #canvas {
@@ -34,7 +34,6 @@ label {
 	left: 1rem;
 	width: min-content;
 	max-height: calc(100vh - 2.4rem);
-	overflow-y: scroll;
 	padding: 0.2rem;
 	outline: 2px grey solid;
 	border-radius: 5px;
@@ -69,21 +68,36 @@ label {
 	}
 
 	:nth-child(n+6):nth-child(-n+10) {
-		margin-left: calc(var(--size) / 4);
+		margin-left: calc(var(--size) / 4)
 	}
 
 	:nth-child(n+11):nth-child(-n+15) {
-		margin-left: calc(var(--size) / 4 * 3);
+		margin-left: calc(var(--size) / 4 * 3)
 	}
 
-	button,
-	&:has(#shift.active) .tooltip {
-		background: oklab(1 -0.1 0.1);
+	button {
+		position: relative;
+		background: oklab(var(--l) var(--a) var(--b));
+
+		&::after {
+			display: none;
+			position: absolute;
+			top: var(--size);
+			padding: 5px;
+			border-radius: 5px;
+			background: oklab(1 calc(-1 * var(--a)) var(--b));
+			/* setKeybindLayer() */
+			content: var(--tooltip);
+			z-index: 2
+		}
+
+		&:hover::after {
+			display: unset
+		}
 	}
 
-	&:has(#shift.active) button,
-	.tooltip {
-		background: oklab(1 0.1 0.1);
+	&:has(#shift.active) button {
+		--a: 0.1
 	}
 }
 
@@ -93,37 +107,26 @@ label {
 }
 
 button {
+	--l: 1;
+	--a: -0.1;
+	--b: 0.1;
 	border-radius: 5px;
-	background: #fff;
+	background: oklab(var(--l) 0 0);
 	width: var(--size);
 	height: var(--size);
 	white-space: nowrap;
 
 	&:hover {
-		filter: brightness(0.9);
-
-		+.tooltip {
-			display: block
-		}
+		--l: 0.9
 	}
 
-	&:active,
-	&.active {
-		filter: brightness(0.8)
+	&:active {
+		--l: 0.8
 	}
 
 	&:disabled {
-		filter: brightness(0.7)
+		--l: 0.7
 	}
-}
-
-.tooltip {
-	position: fixed;
-	display: none;
-	/*font-size: 0.9rem;*/
-	padding: 5px;
-	border-radius: 5px;
-	z-index: 2
 }
 
 input,
@@ -135,7 +138,7 @@ select,
 	border-radius: 2px;
 
 	&:focus {
-		outline: 2px #789 solid;
+		outline: 2px #789 solid
 	}
 }
 
@@ -154,7 +157,7 @@ select,
 	}
 
 	&:has(input:focus) {
-		outline: 2px #789 solid;
+		outline: 2px #789 solid
 	}
 }
 

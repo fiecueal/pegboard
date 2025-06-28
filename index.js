@@ -165,10 +165,10 @@ function setKeybindLayer(l) {
 	for(const k of "qwertasdfgzxcvb") {
 		const b = document.getElementById(k)
 		if(keybinds[l][k]) {
-			b.nextElementSibling.textContent = keybinds[l][k]
+			b.style.setProperty("--tooltip", `"${keybinds[l][k]}"`)
 			b.disabled = false
 		} else {
-			b.nextElementSibling.textContent = null
+			b.style.removeProperty("--tooltip")
 			b.disabled = true
 		}
 	}
