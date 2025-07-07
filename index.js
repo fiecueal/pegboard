@@ -63,11 +63,11 @@ const
 	],
 	/** preview points before they get added to the path */
 	points = [],
+	guiHidden = {all: false, keyboard: false, pathdata: false, tutorial: false},
 	/** keyboard keys tied to command names/tooltips
 	 * [0] = base
 	 * [1] = shift
 	 */
-	guiHidden = {all: false, keyboard: false, pathdata: false, tutorial: false},
 	keybinds = [
 		{
 			q: "raise_stroke_width",
