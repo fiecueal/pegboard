@@ -64,77 +64,47 @@ const
 	/** preview points before they get added to the path */
 	points = [],
 	guiHidden = {all: false, keyboard: false, pathdata: false, tutorial: false},
-	/** keyboard keys tied to command names/tooltips
+	/**
 	 * [0] = base
 	 * [1] = shift
+	 *
+	 * condition also used in other methods like `setKeybindLayer`
 	 */
 	keybinds = [
 		{
-			q: "raise_stroke_width",
-			w: "raise_stroke_opacity",
-			e: "raise_fill_opacity",
-			r: "draw_bezier_quad",
-			t: "draw_bezier_cube",
-			a: "lower_stroke_width",
-			s: "lower_stroke_opacity",
-			d: "lower_fill_opacity",
-			f: "draw_line",
-			g: "draw_arc",
-			z: "cycle_linecap",
-			x: "cycle_linejoin",
-			c: "cycle_fillrule",
-			// c: "close",
-			// v: "fill",
-			// rect: "z",
-			// ellipse: "x",
+			q: {text: "raise stroke width", command() {updateWidth(1)}, condition: _ => true},
+			w: {text: "raise stroke opacity", command() {updateOpacity("stroke-opacity", 10)}, condition: _ => true},
+			e: {text: "raise fill opacity", command() {updateOpacity("fill-opacity", 10)}, condition: _ => true},
+
+			r: {text: "draw bezier quad", command() {addSegment("Q", 2)}, condition: _ => points.length > 2 && points.length % 2 !== 0},
+			t: {text: "draw bezier cube", command() {addSegment("C", 3)}, condition: _ => points.length > 3 && (points.length - 1) % 3 === 0},
+
+			a: {text: "lower stroke width", command() {updateWidth(-1)}, condition: _ => true},
+			s: {text: "lower stroke opacity", command() {updateOpacity("stroke-opacity", -10)}, condition: _ => true},
+			d: {text: "lower fill opacity", command() {updateOpacity("fill-opacity", -10)}, condition: _ => true},
+
+			f: {text: "draw line", command() {addSegment("L")}, condition: _ => points.length > 1},
+			g: {text: "draw arc", command() {addSegment("A")}, condition: _ => points.length > 1},
+
+			z: {text: "cycle linecap", command() {cycleAttrOpts("stroke-linecap", ["butt", "round", "square"])}, condition: _ => true},
+			x: {text: "cycle linejoin", command() {cycleAttrOpts("stroke-linejoin", ["miter", "miter-clip", "round", "arcs", "bevel"])}, condition: _ => true},
+			c: {text: "cycle fillrule", command() {cycleAttrOpts("fill-rule", ["nonzero", "evenodd"])}, condition: _ => true},
 		},
 		{
-			// a: "json",
-			t: "raise_layer",
-			s: "save_as_svg",
-			g: "lower_layer",
-			c: "clear_layer",
+			t: {text: "move up one layer", command() {setCurrentPath(currentLayer + 1)}, condition: _ => true},
+
+			s: {text: "save as svg", command() {saveAs("image/svg+xml")}, condition: _ => true},
 			// d: "png",
 			// f: "webp",
-			// z: "undo",
-			// x: "redo",
+			g: {text: "move down one layer", command() {setCurrentPath(currentLayer + 1)}, condition: _ => true},
+
+			// z: {text: "undo", command() {undo()}, condition: _ => true},
+			// x: {text: "redo"},
 			// c: "crop",
-			v: "toggle_preview",
+			c: {text: "clear layer", command() {clearPath()}, condition: _ => true},
+			v: {text: "toggle preview", command() {togglePreview()}, condition: _ => true},
 		}
-	],
-	/** fns that map to `keybinds` values */
-	commands = {
-		//STROKES
-		draw_line: _ => points.length > 1 && addSegment("L"),
-		draw_arc: _ => points.length > 1 && addSegment("A"),
-		draw_bezier_quad: _ => points.length > 2 && points.length % 2 !== 0 && addSegment("Q", 2),
-		draw_bezier_cube: _ => points.length > 3 && (points.length - 1) % 3 === 0 && addSegment("C", 3),
-		//STROKE STYLES
-		cycle_linecap: _ => cycleAttrOpts("stroke-linecap", ["butt", "round", "square"]),
-		cycle_linejoin: _ => cycleAttrOpts("stroke-linejoin", ["miter", "miter-clip", "round", "arcs", "bevel"]),
-		cycle_fillrule: _ => cycleAttrOpts("fill-rule", ["nonzero", "evenodd"]),
-		raise_stroke_width: _ => updateWidth(1),
-		lower_stroke_width: _ => updateWidth(-1),
-		raise_stroke_opacity: _ => updateOpacity("stroke-opacity", 10),
-		lower_stroke_opacity: _ => updateOpacity("stroke-opacity", -10),
-		raise_fill_opacity: _ => updateOpacity("fill-opacity", 10),
-		lower_fill_opacity: _ => updateOpacity("fill-opacity", -10),
-		//EXPORTS
-		save_as_svg: _ => saveAs("image/svg+xml"),
-		// png: _ => saveAs("image/png"),
-		// webp: _ => saveAs("image/webp")
-		// json: _ => saveAs("json")
-		//TODO add/rm new paths in proper order
-		//TODO handle skipping empty layers
-		raise_layer: _ => setCurrentPath(currentLayer + 1),
-		lower_layer: _ => setCurrentPath(currentLayer - 1),
-		clear_layer: _ => {
-			currentPath.d.length = 0
-			currentPath.el.removeAttribute("d")
-			draw({render: true})
-		},
-		toggle_preview: _ => {render.preview = !render.preview; draw()}
-	}
+	]
 
 let
 	clickdown,
@@ -165,7 +135,7 @@ function setKeybindLayer(l) {
 	for(const k of "qwertasdfgzxcvb") {
 		const b = document.getElementById(k)
 		if(keybinds[l][k]) {
-			b.style.setProperty("--tooltip", `"${keybinds[l][k]}"`)
+			b.style.setProperty("--tooltip", `'${keybinds[l][k].text}'`)
 			b.disabled = false
 		} else {
 			b.style.removeProperty("--tooltip")
@@ -204,6 +174,12 @@ function setCurrentPath(d) {
 	}
 
 	draw()
+}
+
+function clearPath() {
+	currentPath.d.length = 0
+	currentPath.el.removeAttribute("d")
+	draw({render: true})
 }
 
 function drawGrid(redraw) {
@@ -317,6 +293,11 @@ function draw(redraw = {}) {
 	drawCursor()
 }
 
+function togglePreview() {
+	render.preview = !render.preview
+	draw()
+}
+
 function stringifySegment(segment) {
 	let d = ""
 	for(let i = 0;i < segment.length;i++) {
@@ -414,6 +395,7 @@ function cycleAttrOpts(attr, opts) {
 	draw({render: true})
 }
 
+//TODO match with gui
 function updateWidth(n) {
 	const prev = parseInt(currentPath.el.getAttribute("stroke-width")) || 1
 	const next = Math.max(prev + n, 1)
@@ -483,8 +465,11 @@ function keydown(e) {
 			document.querySelector("input, select").focus()
 			break
 		default:
-			const f = keybinds[shift.down ? 1 : 0][e.key.toLowerCase()]
-			if(f) commands[f]()
+			const k = keybinds[shift.down ? 1 : 0][e.key.toLowerCase()]
+			if(k?.condition()) {
+				k.command()
+				// track history here
+			}
 	}
 }
 
@@ -553,6 +538,7 @@ function mouseup(e) {
 
 	switch(e.button) {
 		case 0:
+			// add new point
 			if(clickup.x === clickdown.x && clickup.y === clickdown.y || !clickdown.points) {
 				points.push([cursor.x, cursor.y])
 				ctx.beginPath()
@@ -564,6 +550,7 @@ function mouseup(e) {
 				break
 			}
 
+			// move held points
 			for(const point of clickdown.points) {
 				point.x = clickup.x
 				point.y = clickup.y
