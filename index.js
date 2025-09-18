@@ -4,11 +4,11 @@ const
 	canvas = document.getElementById("canvas"),
 	ctx = canvas.getContext("2d", {desynchronized: true}), // test
 	/** misc app properties */
-	state = { //later
-		/** pixel offset of canvas from topleft */
-		dragOffset: [0, 0],
-		zoom: 100,
-	},
+	// state = { //later
+	// 	/** pixel offset of canvas from topleft */
+	// 	dragOffset: [0, 0],
+	// 	zoom: 100,
+	// },
 	shift = {
 		/** @type HTMLButtonElement */
 		b: document.getElementById("shift"),
