@@ -423,8 +423,7 @@ function updateOpacity(attr, n) {
 }
 
 function keydown(e) {
-	if(e.repeat) return
-	if(document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "SELECT")
+	if(document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "SELECT") {
 		switch(e.key) {
 			case "Enter":
 			case "Escape":
@@ -437,7 +436,10 @@ function keydown(e) {
 				if(next < 0) next = cyclegroup.length - 1
 				cyclegroup[next].focus()
 		}
-	else switch(e.key) {
+		return
+	}
+	if(e.repeat) return
+	switch(e.key) {
 		case "Shift":
 			if(e.gui) {
 				if(shift.held) return
