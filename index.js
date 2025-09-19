@@ -96,7 +96,8 @@ const
 			s: {text: "save as svg", command() {saveAs("image/svg+xml")}, condition: _ => true},
 			// d: "png",
 			// f: "webp",
-			g: {text: "move down one layer", command() {setCurrentPath(currentLayer + 1)}, condition: _ => true},
+			
+			g: {text: "move down one layer", command() {setCurrentPath(currentLayer - 1)}, condition: _ => true},
 
 			// z: {text: "undo", command() {undo()}, condition: _ => true},
 			// x: {text: "redo"},
