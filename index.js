@@ -516,6 +516,7 @@ function mousemove(e) {
 	const y = Math.trunc((e.clientY + grid.gap / 2 - grid.offsetY) / grid.gap)
 
 	if(cursor.x !== x || cursor.y !== y) {
+		document.getElementById("cursor").textContent = `x: ${x}, y: ${y}`
 		cursor.x = x
 		cursor.y = y
 		draw()
