@@ -136,7 +136,8 @@ function setKeybindLayer(l) {
 		const b = document.getElementById(k)
 		if(keybinds[l][k]) {
 			b.style.setProperty("--tooltip", `'${keybinds[l][k].text}'`)
-			b.disabled = false
+			if(keybinds[l][k].condition()) b.disabled = false
+			else b.disabled = true
 		} else {
 			b.style.removeProperty("--tooltip")
 			b.disabled = true
@@ -461,6 +462,7 @@ function keydown(e) {
 		case "Escape":
 			points.length = 0
 			draw()
+			setKeybindLayer(shift.down ? 1 : 0)
 			break
 		case "Tab":
 			e.preventDefault()
@@ -549,6 +551,8 @@ function mouseup(e) {
 				ctx.arc(x, y, 3, 0, 2 * Math.PI)
 				ctx.fillStyle = "grey"
 				ctx.fill()
+				// toggle draw buttons when button gets added
+				setKeybindLayer(shift.down ? 1 : 0)
 				break
 			}
 
