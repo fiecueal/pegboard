@@ -38,6 +38,8 @@
       <button id="shift" onclick="keydown({key: 'Shift', gui: true})">SHIFT</button>
     </div>
     <div id="pathdata">
+      <label for="cursor">cursor position</label>
+      <p id="cursor"></p>
       <label for="current-layer">current layer</label>
       <input id="current-layer" type="number" data-target="layer" min="0" value="0" tabindex="1">
 
@@ -116,15 +118,6 @@
         <br>
         <b>ESC</b> to remove preview points
       </p>
-      <b>Draw Commands</b>
-      <dl>
-        <dt>line (F) and arc (G)</dt>
-        <dd>at least 2 points</dd>
-        <dt>quadratic bezier (R) </dt>
-        <dd>at least 3 points & odd number of points</dd>
-        <dt>cubic bezier (T)</dt>
-        <dd>at least 4 points & (number of points - 1) divisible by 3</dd>
-      </dl>
       <a href="https://github.com/fiecueal/pegboard">source code</a>
     </div>
   </aside>
