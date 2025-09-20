@@ -96,16 +96,57 @@ const
 			s: {text: "save as svg", command() {saveAs("image/svg+xml")}, condition: _ => true},
 			// d: "png",
 			// f: "webp",
-			
+
 			g: {text: "move down one layer", command() {setCurrentPath(currentLayer - 1)}, condition: _ => true},
 
-			// z: {text: "undo", command() {undo()}, condition: _ => true},
-			// x: {text: "redo"},
+			z: {text: "undo", command() {timeline.undo()}, condition: _ => timeline.index > 0},
+			x: {text: "redo", command() {timeline.redo()}, condition: _ => timeline.index < timeline.stack.length},
+
 			// c: "crop",
 			c: {text: "clear layer", command() {clearPath()}, condition: _ => true},
 			v: {text: "toggle preview", command() {togglePreview()}, condition: _ => true},
 		}
-	]
+	],
+	//MAYBE size limit on stack
+	timeline = {
+		stack: [], index: 0,
+
+		track(action, ...args) {
+			this.stack.splice(this.index)
+			switch(action) {
+				case "movePoints":
+					this.stack.push({action, points: args[0], oldPos: args[1], newPos: args[2]})
+			}
+			this.index++
+			console.log("track")
+			console.log(`stack: ${this.stack}`)
+			console.log(`index: ${this.index}`)
+		},
+
+		undo() {
+			const a = this.stack[this.index - 1]
+			switch(a.action) {
+				case "movePoints":
+					movePoints(a.points, a.oldPos, true)
+			}
+			this.index--
+			console.log("undo")
+			console.log(`stack: ${this.stack}`)
+			console.log(`index: ${this.index}`)
+		},
+
+		redo() {
+			const a = this.stack[this.index]
+			switch(a.action) {
+				case "movePoints":
+					movePoints(a.points, a.newPos, true)
+			}
+			this.index++
+			console.log("redo")
+			console.log(`stack: ${this.stack}`)
+			console.log(`index: ${this.index}`)
+		}
+	}
 
 let
 	clickdown,
@@ -390,6 +431,18 @@ function addSegment(type, count = 1) {
 	draw({render: true})
 }
 
+/** assumes all points start at the same position */
+function movePoints(points, newPos, fromTimeline = false) {
+	if(!fromTimeline) timeline.track("movePoints", points, [points[0].x, points[0].y], newPos)
+
+	for(const point of points) {
+		point.x = newPos[0]
+		point.y = newPos[1]
+	}
+	buildSVG()
+	draw({render: true})
+}
+
 function cycleAttrOpts(attr, opts) {
 	const prev = currentPath.el.getAttribute(attr) || opts[0]
 	const next = opts[(opts.indexOf(prev) + 1) % opts.length]
@@ -559,16 +612,7 @@ function mouseup(e) {
 				ctx.fill()
 				// toggle draw buttons when button gets added
 				setKeybindLayer(shift.down ? 1 : 0)
-				break
-			}
-
-			// move held points
-			for(const point of clickdown.points) {
-				point.x = clickup.x
-				point.y = clickup.y
-			}
-			buildSVG()
-			draw({render: true})
+			} else movePoints(clickdown.points, [cursor.x, cursor.y])
 			break
 		case 2: //TODO not broken but it looks atrocious
 			if(!clickdown.points) break
