@@ -225,6 +225,11 @@ function clearPath() {
 	draw({render: true})
 }
 
+function drawArc(x, y, r) {
+	ctx.moveTo(x, y)
+	ctx.arc(x, y, r, 0, 2 * Math.PI)
+}
+
 function drawGrid(redraw) {
 	if(render.preview) return
 	if(grid.img && !redraw) return ctx.drawImage(grid.img, 0, 0)
@@ -233,9 +238,7 @@ function drawGrid(redraw) {
 	const bigR = grid.gap * 4
 	for(let x = grid.offsetX;x < canvas.width;x += grid.gap) {
 		for(let y = grid.offsetY;y < canvas.height;y += grid.gap) {
-			const r = x % bigR === grid.offsetX && y % bigR === grid.offsetY ? 2 : 1
-			ctx.moveTo(x, y)
-			ctx.arc(x, y, r, 0, 2 * Math.PI)
+			drawArc(x, y, x % bigR === grid.offsetX && y % bigR === grid.offsetY ? 2 : 1)
 		}
 	}
 	ctx.fillStyle = "darkgrey"
@@ -273,10 +276,7 @@ function drawRender(redraw) {
 function drawPreviewPoints() {
 	ctx.beginPath()
 	for(const point of points) {
-		const x = point[0] * grid.gap + grid.offsetX
-		const y = point[1] * grid.gap + grid.offsetY
-		ctx.moveTo(x, y)
-		ctx.arc(x, y, 3, 0, 2 * Math.PI)
+		drawArc(point[0] * grid.gap + grid.offsetX, point[1] * grid.gap + grid.offsetY, 3)
 	}
 	ctx.fillStyle = "grey"
 	ctx.fill()
@@ -285,18 +285,19 @@ function drawPreviewPoints() {
 function drawPlacedPoints() {
 	if(render.preview) return
 	for(const segment of currentPath.d) {
+		ctx.beginPath()
 		for(const point of segment) {
-			const x = point.x * grid.gap + grid.offsetX
-			const y = point.y * grid.gap + grid.offsetY
-			ctx.beginPath()
-			ctx.arc(x, y, grid.gap / 3, 0, 2 * Math.PI)
-			ctx.fillStyle = "black"
-			ctx.fill()
-			ctx.beginPath()
-			ctx.arc(x, y, grid.gap / 6, 0, 2 * Math.PI)
-			ctx.fillStyle = "white"
-			ctx.fill()
+			drawArc(point.x * grid.gap + grid.offsetX, point.y * grid.gap + grid.offsetY, grid.gap / 3)
 		}
+		ctx.fillStyle = "black"
+		ctx.fill()
+
+		ctx.beginPath()
+		for(const point of segment) {
+			drawArc(point.x * grid.gap + grid.offsetX, point.y * grid.gap + grid.offsetY, grid.gap / 6)
+		}
+		ctx.fillStyle = "white"
+		ctx.fill()
 	}
 }
 
@@ -605,9 +606,7 @@ function mouseup(e) {
 			if(clickup.x === clickdown.x && clickup.y === clickdown.y || !clickdown.points) {
 				points.push([cursor.x, cursor.y])
 				ctx.beginPath()
-				const x = cursor.x * grid.gap + grid.offsetX
-				const y = cursor.y * grid.gap + grid.offsetY
-				ctx.arc(x, y, 3, 0, 2 * Math.PI)
+				drawArc(cursor.x * grid.gap + grid.offsetX, cursor.y * grid.gap + grid.offsetY, 3)
 				ctx.fillStyle = "grey"
 				ctx.fill()
 				// toggle draw buttons when button gets added
