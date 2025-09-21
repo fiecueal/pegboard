@@ -38,32 +38,33 @@
       <button id="shift" onclick="keydown({key: 'Shift', gui: true})">SHIFT</button>
     </div>
     <div id="pathdata">
-      <label for="cursor">cursor position</label>
+      <p>cursor position</p>
       <p id="cursor"></p>
-      <label for="current-layer">current layer</label>
+
+      <p>current layer</p>
       <input id="current-layer" type="number" data-target="layer" min="0" value="0" tabindex="1">
 
       <b>Stroke</b>
 
-      <label for="stroke">color</label>
+      <p>color</p>
       <div id="rgb-input">
         <input id="stroke" data-target="rgb" maxlength="6" pattern="([0-9a-fA-F]{3})*">
       </div>
 
-      <label for="stroke-dasharray">dash array</label>
+      <p>dash array</p>
       <input id="stroke-dasharray" data-target="number-list" pattern="(\d*\s*)*">
 
-      <label for="stroke-dashoffset">dash offset</label>
+      <p>dash offset</p>
       <input id="stroke-dashoffset" type="number" data-target="number" value="0">
 
-      <label for="stroke-linecap">linecap</label>
+      <p>linecap</p>
       <select id="stroke-linecap">
         <option selected>butt</option>
         <option>round</option>
         <option>square</option>
       </select>
 
-      <label for="stroke-linejoin">linejoin</label>
+      <p>linejoin</p>
       <select id="stroke-linejoin">
         <option selected>miter</option>
         <option>miter-clip</option>
@@ -72,26 +73,26 @@
         <option>bevel</option>
       </select>
 
-      <label for="stroke-miterlimit">miter limit</label>
+      <p>miter limit</p>
       <input id="stroke-miterlimit" type="number" data-target="number" min="0" value="4">
 
-      <label for="stroke-opacity">opacity</label>
+      <p>opacity</p>
       <input id="stroke-opacity" type="number" data-target="percent" min="0" max="100" value="100">
 
-      <label for="stroke-width">width</label>
+      <p>width</p>
       <input id="stroke-width" type="number" data-target="number" min="1" value="1">
 
       <b>Fill</b>
 
-      <label for="fill">color</label>
+      <p>color</p>
       <div id="rgb-input">
         <input id="fill" data-target="rgb" maxlength="6" pattern="([0-9a-fA-F]{3})*">
       </div>
 
-      <label for="fill-opacity">opacity</label>
+      <p>opacity</p>
       <input id="fill-opacity" type="number" data-target="percent" min="0" max="100" value="100">
 
-      <label for="fill-rule">rule</label>
+      <p>rule</p>
       <select id="fill-rule">
         <option selected>nonzero</option>
         <option>evenodd</option>
