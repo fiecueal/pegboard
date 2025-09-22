@@ -31,22 +31,16 @@ const
 		_gap: 15, //MAYBE infinite zoom... somehow
 		set gap(n) {this._gap = Math.min(Math.max(n, 10), 20)},
 		get gap() {return this._gap},
-		/**
-		 * cached as image; everything gets rerendered on mousemove
-		 * so use a cached image for grid unless resizing the canvas
-		 * @type {?HTMLImageElement}
-		 */
-		img: null
 	},
 	render = {
 		/** as an element */
 		svg: document.createElementNS("http://www.w3.org/2000/svg", "svg"),
-		/** @type {?HTMLImageElement} cached as image; same reason as `grid.img` */
-		img: null,
-		/** dimensions in pixels for rendering img */
-		imgSize: null,
 		/** show/hide dots to preview what the downloaded svg looks like */
 		preview: false
+	},
+	drawCache = {
+		grid: null,
+		render: null,
 	},
 	cursor = {x: 0, y: 0},
 	/** svg path elements and data associated with them */
@@ -232,7 +226,7 @@ function drawArc(x, y, r) {
 
 function drawGrid(redraw) {
 	if(render.preview) return
-	if(grid.img && !redraw) return ctx.drawImage(grid.img, 0, 0)
+	if(drawCache.grid && !redraw) return ctx.drawImage(drawCache.grid, 0, 0)
 
 	ctx.beginPath()
 	const bigR = grid.gap * 4
@@ -246,31 +240,29 @@ function drawGrid(redraw) {
 
 	canvas.toBlob(blob => {
 		const src = URL.createObjectURL(blob)
-		grid.img = new Image()
-		grid.img.onload = _ => URL.revokeObjectURL(src)
-		grid.img.src = src
+		drawCache.grid = new Image()
+		drawCache.grid.onload = _ => {
+			URL.revokeObjectURL(src)
+			draw()
+		}
+		drawCache.grid.src = src
 	})
 }
 
 function drawRender(redraw) {
-	if(render.img) {
-		ctx.drawImage(render.img, grid.offsetX, grid.offsetY, render.imgSize.w, render.imgSize.h)
-		if(!redraw) return
-	}
+	if(drawCache.render && !redraw) return ctx.drawImage(drawCache.render, grid.offsetX, grid.offsetY)
 
-	//TODO turn svg to img but with size of canvas to avoid blurring (and replace render.imgSize)
-	const s = new XMLSerializer().serializeToString(render.svg)
-	const src = URL.createObjectURL(new Blob([s], {type: "image/svg+xml"}))
-	// const src = `data:image/svg+xml;base64,${btoa(s)}` // Dotgrid's method
-	// const src = `data:image/svg+xml,${encodeURIComponent(s)}`
+	const src = URL.createObjectURL(new Blob(
+		[new XMLSerializer().serializeToString(render.svg)],
+		{type: "image/svg+xml"}
+	))
 
-	render.imgSize = {w: canvas.width - grid.offsetX * 2, h: canvas.height - grid.offsetY * 2}
-	render.img = new Image()
-	render.img.onload = _ => {
+	drawCache.render = new Image()
+	drawCache.render.onload = _ => {
 		URL.revokeObjectURL(src)
 		draw()
 	}
-	render.img.src = src
+	drawCache.render.src = src
 }
 
 function drawPreviewPoints() {
@@ -328,10 +320,10 @@ function drawCursor() {
 	ctx.stroke()
 }
 
-function draw(redraw = {}) {
+function draw({grid, render} = {}) {
 	canvas.width = canvas.width
-	drawGrid(redraw.grid)
-	drawRender(redraw.render)
+	drawGrid(grid)
+	drawRender(render)
 	drawPreviewPoints()
 	drawPlacedPoints()
 	drawCursor()
@@ -383,6 +375,8 @@ function stringifySegment(segment) {
 //TODO don't build after every action; just add new points as needed; goal: only call before exporting
 //TODO proper layer addition and removal
 function buildSVG() {
+	render.svg.setAttribute("width", canvas.width - grid.offsetX * 2)
+	render.svg.setAttribute("height", canvas.height - grid.offsetY * 2)
 	render.svg.setAttribute("viewBox", `0 0 ${grid.x} ${grid.y}`) //MAYBE cache viewbox in var for other uses
 	//TODO insert paths at correct index instead of clearing each build
 	render.svg.innerHTML = ""
@@ -559,13 +553,11 @@ function resize() {
 
 function wheel(e) {
 	grid.gap += e.deltaY < 0 ? 1 : -1
-
-	//TODO set svg w|h on img creation instead of viewbox magic
 	grid.x = Math.trunc(canvas.width / grid.gap)
 	grid.y = Math.trunc(canvas.height / grid.gap)
 	grid.offsetX = Math.trunc(canvas.width % grid.gap / 2)
 	grid.offsetY = Math.trunc(canvas.height % grid.gap / 2)
-	render.svg.setAttribute("viewBox", `0 0 ${grid.x} ${grid.y}`)
+	buildSVG()
 	draw({grid: true, render: true})
 }
 
