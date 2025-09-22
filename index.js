@@ -98,7 +98,7 @@ const
 			x: {text: "redo", command() {timeline.redo()}, condition: _ => timeline.index < timeline.stack.length},
 
 			// c: "crop",
-			c: {text: "clear layer", command() {clearPath()}, condition: _ => true},
+			c: {text: "clear layer", command() {clearPath()}, condition: _ => currentPath.d.length > 0},
 			v: {text: "toggle preview", command() {togglePreview()}, condition: _ => true},
 		}
 	],
