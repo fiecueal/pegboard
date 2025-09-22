@@ -265,15 +265,6 @@ function drawRender(redraw) {
 	drawCache.render.src = src
 }
 
-function drawPreviewPoints() {
-	ctx.beginPath()
-	for(const point of points) {
-		drawArc(point[0] * grid.gap + grid.offsetX, point[1] * grid.gap + grid.offsetY, 3)
-	}
-	ctx.fillStyle = "grey"
-	ctx.fill()
-}
-
 function drawPlacedPoints() {
 	if(render.preview) return
 	for(const segment of currentPath.d) {
@@ -291,6 +282,15 @@ function drawPlacedPoints() {
 		ctx.fillStyle = "white"
 		ctx.fill()
 	}
+}
+
+function drawPreviewPoints() {
+	ctx.beginPath()
+	for(const point of points) {
+		drawArc(point[0] * grid.gap + grid.offsetX, point[1] * grid.gap + grid.offsetY, 3)
+	}
+	ctx.fillStyle = "grey"
+	ctx.fill()
 }
 
 function drawCursor() {
@@ -324,8 +324,8 @@ function draw({grid, render} = {}) {
 	canvas.width = canvas.width
 	drawGrid(grid)
 	drawRender(render)
-	drawPreviewPoints()
 	drawPlacedPoints()
+	drawPreviewPoints()
 	drawCursor()
 }
 
