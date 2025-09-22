@@ -80,6 +80,7 @@ const
 			f: {text: "draw line", command() {addSegment("L")}, condition: _ => points.length > 1},
 			g: {text: "draw arc", command() {addSegment("A")}, condition: _ => points.length > 1},
 
+			//TODO simplify to only need attr param
 			z: {text: "cycle linecap", command() {cycleAttrOpts("stroke-linecap", ["butt", "round", "square"])}, condition: _ => true},
 			x: {text: "cycle linejoin", command() {cycleAttrOpts("stroke-linejoin", ["miter", "miter-clip", "round", "arcs", "bevel"])}, condition: _ => true},
 			c: {text: "cycle fillrule", command() {cycleAttrOpts("fill-rule", ["nonzero", "evenodd"])}, condition: _ => true},
@@ -597,7 +598,7 @@ function mouseup(e) {
 				drawArc(cursor.x * grid.gap + grid.offsetX, cursor.y * grid.gap + grid.offsetY, 3)
 				ctx.fillStyle = "grey"
 				ctx.fill()
-				// toggle draw buttons when button gets added
+				// toggle draw buttons when preview point gets added
 				setKeybindLayer(shift.down ? 1 : 0)
 			} else movePoints(clickdown.points, [cursor.x, cursor.y])
 			break
@@ -711,6 +712,5 @@ render.svg.setAttribute("xmlns", "http://www.w3.org/2000/svg")
 render.svg.setAttribute("stroke", "#000") //MAYBE delete or handle default path values better
 render.svg.setAttribute("fill", "none")
 
-setCurrentPath(0)
 setKeybindLayer(0)
 resize()
