@@ -334,11 +334,6 @@ function togglePreview() {
 	draw()
 }
 
-function clearPreviewPoints() {
-	points.length = 0
-	setKeybindLayer(shift.down ? 1 : 0)
-}
-
 function stringifySegment(segment) {
 	let d = ""
 	for(let i = 0;i < segment.length;i++) {
@@ -422,7 +417,7 @@ function addSegment(type, count = 1) {
 		"d",
 		(currentPath.el.getAttribute("d") || "") + stringifySegment(segment)
 	)
-	clearPreviewPoints()
+	points.length = 0
 	draw({render: true})
 }
 
@@ -514,8 +509,9 @@ function keydown(e) {
 			}
 			break
 		case "Escape":
-			clearPreviewPoints()
+			points.length = 0
 			draw()
+			setKeybindLayer(shift.down ? 1 : 0)
 			break
 		case "Tab":
 			e.preventDefault()
@@ -525,7 +521,7 @@ function keydown(e) {
 			const k = keybinds[shift.down ? 1 : 0][e.key.toLowerCase()]
 			if(k?.condition()) {
 				k.command()
-				// track history here
+				setKeybindLayer(shift.down ? 1 : 0)
 			}
 	}
 }
