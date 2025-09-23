@@ -257,7 +257,10 @@ function drawGrid(redraw) {
 }
 
 function drawRender(redraw) {
-	if(drawCache.render && !redraw) return ctx.drawImage(drawCache.render, grid.offsetX, grid.offsetY)
+	if(drawCache.render) {
+		ctx.drawImage(drawCache.render, grid.offsetX, grid.offsetY)
+		if(!redraw) return
+	}
 
 	const src = URL.createObjectURL(new Blob(
 		[new XMLSerializer().serializeToString(render.svg)],
