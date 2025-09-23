@@ -67,15 +67,15 @@ const
 	keybinds = [
 		{
 			q: {text: "raise stroke width", command() {updateWidth(1)}, condition: _ => true},
-			w: {text: "raise stroke opacity", command() {updateOpacity("stroke-opacity", 10)}, condition: _ => true},
-			e: {text: "raise fill opacity", command() {updateOpacity("fill-opacity", 10)}, condition: _ => true},
+			w: {text: "raise stroke opacity", command() {updateOpacity("stroke-opacity", 10)}, condition: _ => opacityCondition("stroke-opacity", "<")},
+			e: {text: "raise fill opacity", command() {updateOpacity("fill-opacity", 10)}, condition: _ => opacityCondition("fill-opacity", "<")},
 
 			r: {text: "draw bezier quad", command() {addSegment("Q", 2)}, condition: _ => points.length > 2 && points.length % 2 !== 0},
 			t: {text: "draw bezier cube", command() {addSegment("C", 3)}, condition: _ => points.length > 3 && (points.length - 1) % 3 === 0},
 
-			a: {text: "lower stroke width", command() {updateWidth(-1)}, condition: _ => true},
-			s: {text: "lower stroke opacity", command() {updateOpacity("stroke-opacity", -10)}, condition: _ => true},
-			d: {text: "lower fill opacity", command() {updateOpacity("fill-opacity", -10)}, condition: _ => true},
+			a: {text: "lower stroke width", command() {updateWidth(-1)}, condition: _ => (parseInt(currentPath.el.getAttribute("stroke-width")) || 1) > 1},
+			s: {text: "lower stroke opacity", command() {updateOpacity("stroke-opacity", -10)}, condition: _ => opacityCondition("stroke-opacity", ">")},
+			d: {text: "lower fill opacity", command() {updateOpacity("fill-opacity", -10)}, condition: _ => opacityCondition("fill-opacity", ">")},
 
 			f: {text: "draw line", command() {addSegment("L")}, condition: _ => points.length > 1},
 			g: {text: "draw arc", command() {addSegment("A")}, condition: _ => points.length > 1},
@@ -92,7 +92,7 @@ const
 			// d: "png",
 			// f: "webp",
 
-			g: {text: "move down one layer", command() {setCurrentPath(currentLayer - 1)}, condition: _ => true},
+			g: {text: "move down one layer", command() {setCurrentPath(currentLayer - 1)}, condition: _ => currentLayer > 0},
 
 			z: {text: "undo", command() {timeline.undo()}, condition: _ => timeline.index > 0},
 			x: {text: "redo", command() {timeline.redo()}, condition: _ => timeline.index < timeline.stack.length},
@@ -160,6 +160,14 @@ let
 	clickup, //TODO might remove
 	currentLayer = 0,
 	currentPath = paths[0]
+
+/** handles parsed NaN without messing with falsy 0 */
+function opacityCondition(attr, sign) {
+	let f = parseFloat(currentPath.el.getAttribute(attr))
+	if(f !== 0) f ||= 1
+	if(sign === "<") return f < 1
+	else return f > 0
+}
 
 function toggleGUI(id) {
 	if(id === "all") {
