@@ -7,17 +7,9 @@ b {
 	text-align: center
 }
 
-#pathdata b {
-	grid-column: span 2
-}
-
 p,
 dl {
 	margin: 0
-}
-
-label {
-	white-space: nowrap
 }
 
 #canvas {
@@ -48,6 +40,16 @@ label {
 
 #togglers {
 	display: flex !important
+}
+
+#pathdata {
+	b {
+		grid-column: span 2
+	}
+
+	p {
+		white-space: nowrap
+	}
 }
 
 #pathdata,
