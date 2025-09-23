@@ -188,52 +188,6 @@ function toggleGUI(id) {
 	guiHidden[id] = !guiHidden[id]
 }
 
-function setKeybindLayer(l) {
-	for(const k of "qwertasdfgzxcvb") {
-		const b = document.getElementById(k)
-		if(keybinds[l][k]) {
-			b.style.setProperty("--tooltip", `'${keybinds[l][k].text}'`)
-			if(keybinds[l][k].condition()) b.disabled = false
-			else b.disabled = true
-		} else {
-			b.style.removeProperty("--tooltip")
-			b.disabled = true
-		}
-	}
-}
-
-/** @param {number} d should already be an int */
-function setCurrentPath(d) {
-	const l = Math.min(Math.max(d, 0), paths.length)
-	if(l === currentLayer) return
-
-	currentLayer = l
-
-	paths[currentLayer] ||= {el: document.createElementNS("http://www.w3.org/2000/svg", "path"), d: []}
-	currentPath = paths[currentLayer]
-	render.svg.appendChild(currentPath.el) //TODO insert at correct index
-
-	for(const el of document.querySelectorAll("input, select")) {
-		if(el.tagName === "SELECT") el.value = currentPath.el.getAttribute(el.id) || el.options[0].label
-		else switch(el.dataset.target) {
-			case "layer":
-				el.value = currentLayer
-				break
-			case "percent":
-				el.value = parseFloat(currentPath.el.getAttribute(el.id)) * 100 || el.defaultValue
-				break
-			case "rgb":
-				el.value = currentPath.el.getAttribute(el.id)?.substring(1) || el.defaultValue
-				break
-			case "number":
-			case "number-list":
-				el.value = currentPath.el.getAttribute(el.id) || el.defaultValue
-		}
-	}
-
-	draw()
-}
-
 function drawArc(x, y, r) {
 	ctx.moveTo(x, y)
 	ctx.arc(x, y, r, 0, 2 * Math.PI)
@@ -352,18 +306,6 @@ function togglePreview() {
 	draw()
 }
 
-function replacePath(path, d, fromTimeline = false) {
-	if(!fromTimeline) timeline.track("replacePath", path, path.d, d)
-	path.d = d
-
-	let d_attr = ""
-	for(const segment of d) {
-		d_attr += stringifySegment(segment)
-	}
-	path.el.setAttribute("d", d_attr)
-	draw({render: true})
-}
-
 function stringifySegment(segment) {
 	let d = ""
 	for(let i = 0;i < segment.length;i++) {
@@ -435,6 +377,50 @@ function saveAs(type) {
 	// c.toBlob()
 }
 
+/** @param {number} d */
+function setCurrentPath(d) {
+	const l = Math.min(Math.max(d, 0), paths.length)
+	if(l === currentLayer) return
+
+	currentLayer = l
+
+	paths[currentLayer] ||= {el: document.createElementNS("http://www.w3.org/2000/svg", "path"), d: []}
+	currentPath = paths[currentLayer]
+	render.svg.appendChild(currentPath.el) //TODO insert at correct index
+
+	for(const el of document.querySelectorAll("input, select")) {
+		if(el.tagName === "SELECT") el.value = currentPath.el.getAttribute(el.id) || el.options[0].label
+		else switch(el.dataset.target) {
+			case "layer":
+				el.value = currentLayer
+				break
+			case "percent":
+				el.value = parseFloat(currentPath.el.getAttribute(el.id)) * 100 || el.defaultValue
+				break
+			case "rgb":
+				el.value = currentPath.el.getAttribute(el.id)?.substring(1) || el.defaultValue
+				break
+			case "number":
+			case "number-list":
+				el.value = currentPath.el.getAttribute(el.id) || el.defaultValue
+		}
+	}
+
+	draw()
+}
+
+function replacePath(path, d, fromTimeline = false) {
+	if(!fromTimeline) timeline.track("replacePath", path, path.d, d)
+	path.d = d
+
+	let d_attr = ""
+	for(const segment of d) {
+		d_attr += stringifySegment(segment)
+	}
+	path.el.setAttribute("d", d_attr)
+	draw({render: true})
+}
+
 /** @param count - control points + end point for beziers */
 function addSegment(type, count = 1) {
 	const segment = [{x: points[0][0], y: points[0][1], type: "M"}]
@@ -459,6 +445,51 @@ function movePoints(points, newPos, fromTimeline = false) {
 		point.x = newPos[0]
 		point.y = newPos[1]
 	}
+	buildSVG()
+	draw({render: true})
+}
+
+function rmPoints() {
+	let p
+	while(p = clickdown.points.pop()) {
+		for(const segment of currentPath.d) {
+			if(!segment.includes(p)) continue
+
+			const i = segment.indexOf(p)
+			switch(p.type) {
+				case "M":
+					if(!segment[1]) break
+					if(segment[1].type === "Q1") segment[2].type = "A0"
+					else if(segment[1].type === "C1") {
+						segment[2].type = "Q1"
+						segment[3].type = "Q0"
+					}
+					segment[1].type = "M"
+					break
+				case "Q1":
+					segment[i + 1].type = "A0"
+					break
+				case "Q0":
+					segment[i - 1].type = "A0"
+					break
+				case "C1":
+					segment[i + 1].type = "Q1"
+					segment[i + 2].type = "Q0"
+					break
+				case "C2":
+					segment[i - 1].type = "Q1"
+					segment[i + 1].type = "Q0"
+					break
+				case "C0":
+					segment[i - 2].type = "Q1"
+					segment[i - 1].type = "Q0"
+			}
+			segment.splice(i, 1)
+			if(segment.length === 0) currentPath.d.splice(currentPath.d.indexOf(segment), 1)
+			break
+		}
+	}
+
 	buildSVG()
 	draw({render: true})
 }
@@ -500,6 +531,20 @@ function updateOpacity(attr, n) {
 	document.getElementById(attr).value = next
 
 	if(next !== prev) draw({render: true})
+}
+
+function setKeybindLayer(l) {
+	for(const k of "qwertasdfgzxcvb") {
+		const b = document.getElementById(k)
+		if(keybinds[l][k]) {
+			b.style.setProperty("--tooltip", `'${keybinds[l][k].text}'`)
+			if(keybinds[l][k].condition()) b.disabled = false
+			else b.disabled = true
+		} else {
+			b.style.removeProperty("--tooltip")
+			b.disabled = true
+		}
+	}
 }
 
 function keydown(e) {
@@ -631,52 +676,7 @@ function mouseup(e) {
 				setKeybindLayer(shift.down ? 1 : 0)
 			} else movePoints(clickdown.points, [cursor.x, cursor.y])
 			break
-		case 2: //TODO not broken but it looks atrocious
-			if(!clickdown.points) break
-
-			let p
-			while(p = clickdown.points.pop()) {
-				for(const segment of currentPath.d) {
-					if(!segment.includes(p)) continue
-
-					const i = segment.indexOf(p)
-					switch(p.type) {
-						case "M":
-							if(!segment[1]) break
-							if(segment[1].type === "Q1") segment[2].type = "A0"
-							else if(segment[1].type === "C1") {
-								segment[2].type = "Q1"
-								segment[3].type = "Q0"
-							}
-							segment[1].type = "M"
-							break
-						case "Q1":
-							segment[i + 1].type = "A0"
-							break
-						case "Q0":
-							segment[i - 1].type = "A0"
-							break
-						case "C1":
-							segment[i + 1].type = "Q1"
-							segment[i + 2].type = "Q0"
-							break
-						case "C2":
-							segment[i - 1].type = "Q1"
-							segment[i + 1].type = "Q0"
-							break
-						case "C0":
-							segment[i - 2].type = "Q1"
-							segment[i - 1].type = "Q0"
-					}
-					segment.splice(i, 1)
-					if(segment.length === 0) currentPath.d.splice(currentPath.d.indexOf(segment), 1)
-					break
-				}
-			}
-
-			buildSVG()
-			draw({render: true})
-			break
+		case 2: if(clickdown.points) rmPoints()
 	}
 
 	clickdown = null
