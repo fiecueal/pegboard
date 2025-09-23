@@ -98,7 +98,7 @@ const
 			x: {text: "redo", command() {timeline.redo()}, condition: _ => timeline.index < timeline.stack.length},
 
 			// c: "crop",
-			c: {text: "clear layer", command() {clearPath()}, condition: _ => currentPath.d.length > 0},
+			c: {text: "clear layer", command() {replacePath(currentPath, [])}, condition: _ => currentPath.d.length > 0},
 			v: {text: "toggle preview", command() {togglePreview()}, condition: _ => true},
 		}
 	],
@@ -111,6 +111,10 @@ const
 			switch(action) {
 				case "movePoints":
 					this.stack.push({action, points: args[0], oldPos: args[1], newPos: args[2]})
+					break
+				case "replacePath": // args: layer, path
+					this.stack.push({action, path: args[0], oldD: args[1], newD: args[2]})
+					break
 			}
 			this.index++
 			console.log("track")
@@ -123,6 +127,10 @@ const
 			switch(a.action) {
 				case "movePoints":
 					movePoints(a.points, a.oldPos, true)
+					break
+				case "replacePath":
+					replacePath(a.path, a.oldD, true)
+					break
 			}
 			this.index--
 			console.log("undo")
@@ -135,6 +143,10 @@ const
 			switch(a.action) {
 				case "movePoints":
 					movePoints(a.points, a.newPos, true)
+					break
+				case "replacePath":
+					replacePath(a.path, a.newD, true)
+					break
 			}
 			this.index++
 			console.log("redo")
@@ -212,12 +224,6 @@ function setCurrentPath(d) {
 	}
 
 	draw()
-}
-
-function clearPath() {
-	currentPath.d.length = 0
-	currentPath.el.removeAttribute("d")
-	draw({render: true})
 }
 
 function drawArc(x, y, r) {
@@ -333,6 +339,18 @@ function draw({grid, render} = {}) {
 function togglePreview() {
 	render.preview = !render.preview
 	draw()
+}
+
+function replacePath(path, d, fromTimeline = false) {
+	if(!fromTimeline) timeline.track("replacePath", path, path.d, d)
+	path.d = d
+
+	let d_attr = ""
+	for(const segment of d) {
+		d_attr += stringifySegment(segment)
+	}
+	path.el.setAttribute("d", d_attr)
+	draw({render: true})
 }
 
 function stringifySegment(segment) {
