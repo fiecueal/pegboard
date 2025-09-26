@@ -166,7 +166,6 @@ const
 
 let
 	clickdown,
-	clickup, //TODO might remove
 	currentLayer = 0,
 	currentPath = paths[0]
 
@@ -691,12 +690,11 @@ function mousedown(e) {
 function mouseup(e) {
 	if(!clickdown) return
 	if(clickdown.b !== e.button) return
-	clickup = {x: cursor.x, y: cursor.y, b: e.button} //MAYBE delete clickup (redundant)
 
 	switch(e.button) {
 		case 0:
-			// add new point
-			if(clickup.x === clickdown.x && clickup.y === clickdown.y || !clickdown.points) {
+			// add preview point
+			if(cursor.x === clickdown.x && cursor.y === clickdown.y || !clickdown.points) {
 				points.push([cursor.x, cursor.y])
 				ctx.beginPath()
 				drawArc(cursor.x * grid.gap + grid.offsetX, cursor.y * grid.gap + grid.offsetY, 3)
