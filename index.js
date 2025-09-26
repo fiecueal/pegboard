@@ -55,8 +55,8 @@ const
 			d: [] //TODO "Z" command toggle for every "M" segment
 		}
 	],
-	/** preview points before they get added to the path */
-	points = [],
+	/** @type {[number, number][]} preview points before they get added to the path */
+	previewPoints = [],
 	guiHidden = {all: false, keyboard: false, pathdata: false, tutorial: false},
 	/**
 	 * [0] = base
@@ -70,15 +70,15 @@ const
 			w: {text: "raise stroke opacity", command() {updateOpacity("stroke-opacity", 10)}, condition: _ => opacityCondition("stroke-opacity", "<")},
 			e: {text: "raise fill opacity", command() {updateOpacity("fill-opacity", 10)}, condition: _ => opacityCondition("fill-opacity", "<")},
 
-			r: {text: "draw bezier quad", command() {addSegment(currentPath, segmentifyPoints("Q", 2))}, condition: _ => points.length > 2 && points.length % 2 !== 0},
-			t: {text: "draw bezier cube", command() {addSegment(currentPath, segmentifyPoints("C", 3))}, condition: _ => points.length > 3 && (points.length - 1) % 3 === 0},
+			r: {text: "draw bezier quad", command() {addSegment(currentPath, segmentifyPoints("Q", 2))}, condition: _ => previewPoints.length > 2 && previewPoints.length % 2 !== 0},
+			t: {text: "draw bezier cube", command() {addSegment(currentPath, segmentifyPoints("C", 3))}, condition: _ => previewPoints.length > 3 && (previewPoints.length - 1) % 3 === 0},
 
 			a: {text: "lower stroke width", command() {updateWidth(-1)}, condition: _ => (parseInt(currentPath.el.getAttribute("stroke-width")) || 1) > 1},
 			s: {text: "lower stroke opacity", command() {updateOpacity("stroke-opacity", -10)}, condition: _ => opacityCondition("stroke-opacity", ">")},
 			d: {text: "lower fill opacity", command() {updateOpacity("fill-opacity", -10)}, condition: _ => opacityCondition("fill-opacity", ">")},
 
-			f: {text: "draw line", command() {addSegment(currentPath, segmentifyPoints("L"))}, condition: _ => points.length > 1},
-			g: {text: "draw arc", command() {addSegment(currentPath, segmentifyPoints("A"))}, condition: _ => points.length > 1},
+			f: {text: "draw line", command() {addSegment(currentPath, segmentifyPoints("L"))}, condition: _ => previewPoints.length > 1},
+			g: {text: "draw arc", command() {addSegment(currentPath, segmentifyPoints("A"))}, condition: _ => previewPoints.length > 1},
 
 			//TODO simplify to only need attr param
 			z: {text: "cycle linecap", command() {cycleAttrOpts("stroke-linecap", ["butt", "round", "square"])}, condition: _ => true},
@@ -266,7 +266,7 @@ function drawPlacedPoints() {
 
 function drawPreviewPoints() {
 	ctx.beginPath()
-	for(const point of points) {
+	for(const point of previewPoints) {
 		drawArc(point[0] * grid.gap + grid.offsetX, point[1] * grid.gap + grid.offsetY, 3)
 	}
 	ctx.fillStyle = "grey"
@@ -430,16 +430,16 @@ function replacePath(path, d, fromTimeline = false) {
 }
 
 /**
- * works directly with `points`
+ * works directly with `previewPoints`
  * @param count - control points + end point for beziers
  */
 function segmentifyPoints(type, count = 1) {
-	const segment = [{x: points[0][0], y: points[0][1], type: "M"}]
-	for(let i = 1;i < points.length;i++) {
-		segment.push({x: points[i][0], y: points[i][1], type: `${type}${i % count}`})
+	const segment = [{x: previewPoints[0][0], y: previewPoints[0][1], type: "M"}]
+	for(let i = 1;i < previewPoints.length;i++) {
+		segment.push({x: previewPoints[i][0], y: previewPoints[i][1], type: `${type}${i % count}`})
 	}
 
-	points.length = 0
+	previewPoints.length = 0
 	return segment
 }
 
@@ -613,7 +613,7 @@ function keydown(e) {
 			}
 			break
 		case "Escape":
-			points.length = 0
+			previewPoints.length = 0
 			draw()
 			setKeybindLayer(shift.down ? 1 : 0)
 			break
@@ -695,7 +695,7 @@ function mouseup(e) {
 		case 0:
 			// add preview point
 			if(cursor.x === clickdown.x && cursor.y === clickdown.y || !clickdown.points) {
-				points.push([cursor.x, cursor.y])
+				previewPoints.push([cursor.x, cursor.y])
 				ctx.beginPath()
 				drawArc(cursor.x * grid.gap + grid.offsetX, cursor.y * grid.gap + grid.offsetY, 3)
 				ctx.fillStyle = "grey"
