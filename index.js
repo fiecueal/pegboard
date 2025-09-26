@@ -70,15 +70,15 @@ const
 			w: {text: "raise stroke opacity", command() {updateOpacity("stroke-opacity", 10)}, condition: _ => opacityCondition("stroke-opacity", "<")},
 			e: {text: "raise fill opacity", command() {updateOpacity("fill-opacity", 10)}, condition: _ => opacityCondition("fill-opacity", "<")},
 
-			r: {text: "draw bezier quad", command() {addSegment("Q", 2)}, condition: _ => points.length > 2 && points.length % 2 !== 0},
-			t: {text: "draw bezier cube", command() {addSegment("C", 3)}, condition: _ => points.length > 3 && (points.length - 1) % 3 === 0},
+			r: {text: "draw bezier quad", command() {addSegment(currentPath, segmentifyPoints("Q", 2))}, condition: _ => points.length > 2 && points.length % 2 !== 0},
+			t: {text: "draw bezier cube", command() {addSegment(currentPath, segmentifyPoints("C", 3))}, condition: _ => points.length > 3 && (points.length - 1) % 3 === 0},
 
 			a: {text: "lower stroke width", command() {updateWidth(-1)}, condition: _ => (parseInt(currentPath.el.getAttribute("stroke-width")) || 1) > 1},
 			s: {text: "lower stroke opacity", command() {updateOpacity("stroke-opacity", -10)}, condition: _ => opacityCondition("stroke-opacity", ">")},
 			d: {text: "lower fill opacity", command() {updateOpacity("fill-opacity", -10)}, condition: _ => opacityCondition("fill-opacity", ">")},
 
-			f: {text: "draw line", command() {addSegment("L")}, condition: _ => points.length > 1},
-			g: {text: "draw arc", command() {addSegment("A")}, condition: _ => points.length > 1},
+			f: {text: "draw line", command() {addSegment(currentPath, segmentifyPoints("L"))}, condition: _ => points.length > 1},
+			g: {text: "draw arc", command() {addSegment(currentPath, segmentifyPoints("A"))}, condition: _ => points.length > 1},
 
 			//TODO simplify to only need attr param
 			z: {text: "cycle linecap", command() {cycleAttrOpts("stroke-linecap", ["butt", "round", "square"])}, condition: _ => true},
@@ -109,6 +109,9 @@ const
 		track(action, ...args) {
 			this.stack.splice(this.index)
 			switch(action) {
+				case "addSegment":
+					this.stack.push({action, path: args[0], segment: args[1]})
+					break
 				case "movePoints":
 					this.stack.push({action, points: args[0], oldPos: args[1], newPos: args[2]})
 					break
@@ -125,6 +128,9 @@ const
 		undo() {
 			const a = this.stack[this.index - 1]
 			switch(a.action) {
+				case "addSegment":
+					rmSegment(a.path, a.segment, true)
+					break
 				case "movePoints":
 					movePoints(a.points, a.oldPos, true)
 					break
@@ -141,6 +147,9 @@ const
 		redo() {
 			const a = this.stack[this.index]
 			switch(a.action) {
+				case "addSegment":
+					addSegment(a.path, a.segment, true)
+					break
 				case "movePoints":
 					movePoints(a.points, a.newPos, true)
 					break
@@ -421,19 +430,40 @@ function replacePath(path, d, fromTimeline = false) {
 	draw({render: true})
 }
 
-/** @param count - control points + end point for beziers */
-function addSegment(type, count = 1) {
+/**
+ * works directly with `points`
+ * @param count - control points + end point for beziers
+ */
+function segmentifyPoints(type, count = 1) {
 	const segment = [{x: points[0][0], y: points[0][1], type: "M"}]
 	for(let i = 1;i < points.length;i++) {
 		segment.push({x: points[i][0], y: points[i][1], type: `${type}${i % count}`})
 	}
-	currentPath.d.push(segment)
 
-	currentPath.el.setAttribute(
-		"d",
-		(currentPath.el.getAttribute("d") || "") + stringifySegment(segment)
-	)
 	points.length = 0
+	return segment
+}
+
+function addSegment(path, segment, fromTimeline = false) {
+	if(!fromTimeline) timeline.track("addSegment", path, segment)
+
+	path.d.push(segment)
+	path.el.setAttribute(
+		"d",
+		(path.el.getAttribute("d") || "") + stringifySegment(segment)
+	)
+	draw({render: true})
+}
+
+function rmSegment(path, segment, fromTimeline = false) {
+	if(!fromTimeline) timeline.track("rmSegment", path, segment)
+
+	path.d.pop()
+	let d = ""
+	for(const s of path.d) {
+		d += stringifySegment(s)
+	}
+	path.el.setAttribute("d", d)
 	draw({render: true})
 }
 
