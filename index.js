@@ -25,7 +25,7 @@ const
 		 * the last peg and the end of the viewport
 		 * only half is needed to center all pegs
 		 */
-		offsetX: 0,
+		offsetX: 0, //TODO set static instead of changing on resize
 		/** `grid.offsetX` Y axis edition */
 		offsetY: 0,
 		_gap: 15, //MAYBE infinite zoom... somehow
@@ -103,7 +103,7 @@ const
 		}
 	],
 	//MAYBE size limit on stack
-	timeline = {
+	timeline = {//TODO catchall default case for actions with similar args
 		stack: [], index: 0,
 
 		track(action, ...args) {
@@ -120,9 +120,9 @@ const
 					break
 			}
 			this.index++
-			console.log("track")
-			console.log(`stack: ${this.stack}`)
-			console.log(`index: ${this.index}`)
+			// console.log("track")
+			// console.log(`stack: ${this.stack}`)
+			// console.log(`index: ${this.index}`)
 		},
 
 		undo() {
@@ -139,9 +139,9 @@ const
 					break
 			}
 			this.index--
-			console.log("undo")
-			console.log(`stack: ${this.stack}`)
-			console.log(`index: ${this.index}`)
+			// console.log("undo")
+			// console.log(`stack: ${this.stack}`)
+			// console.log(`index: ${this.index}`)
 		},
 
 		redo() {
@@ -158,9 +158,9 @@ const
 					break
 			}
 			this.index++
-			console.log("redo")
-			console.log(`stack: ${this.stack}`)
-			console.log(`index: ${this.index}`)
+			// console.log("redo")
+			// console.log(`stack: ${this.stack}`)
+			// console.log(`index: ${this.index}`)
 		}
 	}
 
