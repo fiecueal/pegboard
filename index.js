@@ -121,6 +121,8 @@ const
 				case "replacePath": // args: layer, path
 					this.stack.push({action, path: args[0], oldD: args[1], newD: args[2]})
 					break
+				default:
+					return console.log("track failed")
 			}
 			this.index++
 			// console.log("track")
@@ -143,6 +145,8 @@ const
 				case "replacePath":
 					replacePath(a.path, a.oldD, true)
 					break
+				default:
+					return console.log("undo failed")
 			}
 			this.index--
 			// console.log("undo")
@@ -165,6 +169,8 @@ const
 				case "replacePath":
 					replacePath(a.path, a.newD, true)
 					break
+				default:
+					return console.log("redo failed")
 			}
 			this.index++
 			// console.log("redo")
