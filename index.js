@@ -112,6 +112,9 @@ const
 				case "addSegment":
 					this.stack.push({action, path: args[0], segment: args[1]})
 					break
+				case "rmPoints":
+					this.stack.push({action, path: args[0], points: args[1]})
+					break
 				case "movePoints":
 					this.stack.push({action, points: args[0], oldPos: args[1], newPos: args[2]})
 					break
@@ -131,6 +134,9 @@ const
 				case "addSegment":
 					rmSegment(a.path, a.segment, true)
 					break
+				case "rmPoints":
+					reattachPoints(a.points)
+					break
 				case "movePoints":
 					movePoints(a.points, a.oldPos, true)
 					break
@@ -149,6 +155,9 @@ const
 			switch(a.action) {
 				case "addSegment":
 					addSegment(a.path, a.segment, true)
+					break
+				case "rmPoints":
+					rmPoints(a.path, a.points, true)
 					break
 				case "movePoints":
 					movePoints(a.points, a.newPos, true)
@@ -315,6 +324,8 @@ function togglePreview() {
 }
 
 function stringifySegment(segment) {
+	if(segment.length === 0) return ""
+
 	let d = ""
 	for(let i = 0;i < segment.length;i++) {
 		let point = segment[i]
@@ -478,13 +489,68 @@ function movePoints(points, newPos, fromTimeline = false) {
 	draw({render: true})
 }
 
-function rmPoints() {
-	let p
-	while(p = clickdown.points.pop()) {
-		for(const segment of currentPath.d) {
+/**
+ * from undo only
+ * reattaches point to segment
+ * point's segment & index should be referenced in the point object
+ */
+function reattachPoints(points) {
+	for(let i = points.length - 1;i >= 0;i--) {
+		const p = points[i]
+		p.segment.splice(p.i, 0, p)
+		switch(p.type) {
+			case "Q1":
+				p.segment[p.i + 1].type = "Q0"
+				break
+			case "Q0":
+				p.segment[p.i - 1].type = "Q1"
+				break
+			case "C1":
+				p.segment[p.i + 1].type = "C2"
+				p.segment[p.i + 2].type = "C0"
+				break
+			case "C2":
+				p.segment[p.i - 1].type = "C1"
+				p.segment[p.i + 1].type = "C0"
+				break
+			case "C0":
+				p.segment[p.i - 2].type = "C1"
+				p.segment[p.i - 1].type = "C2"
+				break
+			default:
+				if(p.type[0] !== "M") break
+				if(p.type === "M") break
+				// ex. change self type from "ML0" to "M" and next point type from "M" to "L0"
+				p.segment[p.i + 1].type = p.type.slice(1)
+				p.type = "M"
+
+				switch(p.segment[p.i + 1].type) {
+					case "Q1":
+						p.segment[p.i + 2].type = "Q0"
+						break
+					case "C1":
+						p.segment[p.i + 2].type = "C2"
+						p.segment[p.i + 3].type = "C0"
+				}
+		}
+
+		delete p.segment
+		delete p.i
+	}
+
+	buildSVG() //TODO build only currentPath.d
+	draw({render: true})
+}
+
+function rmPoints(path, points, fromTimeline = false) {
+	if(!fromTimeline) timeline.track("rmPoints", path, points)
+
+	for(const p of points) {
+		for(const segment of path.d) {
 			if(!segment.includes(p)) continue
 
-			const i = segment.indexOf(p)
+			p.segment = segment
+			p.i = segment.indexOf(p)
 			switch(p.type) {
 				case "M":
 					if(!segment[1]) break
@@ -493,28 +559,28 @@ function rmPoints() {
 						segment[2].type = "Q1"
 						segment[3].type = "Q0"
 					}
+					p.type += segment[1].type // ex. change type from "M" to "ML0"
 					segment[1].type = "M"
 					break
 				case "Q1":
-					segment[i + 1].type = "A0"
+					segment[p.i + 1].type = "A0"
 					break
 				case "Q0":
-					segment[i - 1].type = "A0"
+					segment[p.i - 1].type = "A0"
 					break
 				case "C1":
-					segment[i + 1].type = "Q1"
-					segment[i + 2].type = "Q0"
+					segment[p.i + 1].type = "Q1"
+					segment[p.i + 2].type = "Q0"
 					break
 				case "C2":
-					segment[i - 1].type = "Q1"
-					segment[i + 1].type = "Q0"
+					segment[p.i - 1].type = "Q1"
+					segment[p.i + 1].type = "Q0"
 					break
 				case "C0":
-					segment[i - 2].type = "Q1"
-					segment[i - 1].type = "Q0"
+					segment[p.i - 2].type = "Q1"
+					segment[p.i - 1].type = "Q0"
 			}
-			segment.splice(i, 1)
-			if(segment.length === 0) currentPath.d.splice(currentPath.d.indexOf(segment), 1)
+			segment.splice(p.i, 1)
 			break
 		}
 	}
@@ -704,7 +770,7 @@ function mouseup(e) {
 				setKeybindLayer(shift.down ? 1 : 0)
 			} else movePoints(clickdown.points, [cursor.x, cursor.y])
 			break
-		case 2: if(clickdown.points) rmPoints()
+		case 2: if(clickdown.points) rmPoints(currentPath, clickdown.points)
 	}
 
 	clickdown = null
