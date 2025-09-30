@@ -524,22 +524,20 @@ function reattachPoints(points) {
 				p.segment[p.i - 1].type = "C2"
 				break
 			default:
-				if(p.type[0] !== "M") break
-				if(p.type === "M") break
+				// p.type can only be "M", "L0", "ML0"
+				if(p.type.length !== 3) break
 				// ex. change self type from "ML0" to "M" and next point type from "M" to "L0"
-				p.segment[p.i + 1].type = p.type.slice(1)
+				p.segment[1].type = p.type.slice(1)
 				p.type = "M"
-
-				switch(p.segment[p.i + 1].type) {
+				switch(p.segment[1].type) {
 					case "Q1":
-						p.segment[p.i + 2].type = "Q0"
+						p.segment[2].type = "Q0"
 						break
 					case "C1":
-						p.segment[p.i + 2].type = "C2"
-						p.segment[p.i + 3].type = "C0"
+						p.segment[2].type = "C2"
+						p.segment[3].type = "C0"
 				}
 		}
-
 		delete p.segment
 		delete p.i
 	}
@@ -559,11 +557,14 @@ function rmPoints(path, points, fromTimeline = false) {
 			p.i = segment.indexOf(p)
 			switch(p.type) {
 				case "M":
-					if(!segment[1]) break
-					if(segment[1].type === "Q1") segment[2].type = "A0"
-					else if(segment[1].type === "C1") {
-						segment[2].type = "Q1"
-						segment[3].type = "Q0"
+					if(segment.length === 1) break
+					switch(segment[1].type) {
+						case "Q1":
+							segment[2].type = "A0"
+							break
+						case "C1":
+							segment[2].type = "Q1"
+							segment[3].type = "Q0"
 					}
 					p.type += segment[1].type // ex. change type from "M" to "ML0"
 					segment[1].type = "M"
